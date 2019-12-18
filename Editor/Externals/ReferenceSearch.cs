@@ -160,7 +160,6 @@ public sealed class Search
 								{
 									if( founds.ContainsKey( targetPath) == false)
 									{
-										Test( targetPath);
 										founds.Add( targetPath, new ElementSource( targetPath));
 									}
 								}
@@ -175,7 +174,7 @@ public sealed class Search
 		OnProgress( "Trace Dependents", 1);
 		OnFinish();
 	}
-#if true
+#if false
 	static void Test( string targetPath)
 	{
 		var builder = new System.Text.StringBuilder();
