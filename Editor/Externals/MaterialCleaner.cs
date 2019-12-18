@@ -39,20 +39,27 @@ internal sealed class MaterialCleaner
 				int processCount = 0;
 				int i0 = 0;
 				
-				foreach( var assetGuid in assetGuids)
+				try
 				{
-					string path = AssetDatabase.GUIDToAssetPath( assetGuid);
-					
-					if( AssetDatabase.LoadMainAssetAtPath( path) is Material material)
+					foreach( var assetGuid in assetGuids)
 					{
-						EditorUtility.DisplayProgressBar( kProgressCaptionName, 
-							string.Format( "{0}", material.name), i0 / assetCount);
-						DeleteUnusedProperties( material, path);
-						++processCount;
+						string path = AssetDatabase.GUIDToAssetPath( assetGuid);
+						
+						if( AssetDatabase.LoadMainAssetAtPath( path) is Material material)
+						{
+							EditorUtility.DisplayProgressBar( kProgressCaptionName, 
+								string.Format( "{0}", material.name), i0 / assetCount);
+							DeleteUnusedProperties( material, path);
+							++processCount;
+						}
+						++i0;
 					}
-					++i0;
+					EditorUtility.DisplayProgressBar( kProgressCaptionName, "Refresh AssetDatabase...", 1);
 				}
-				EditorUtility.DisplayProgressBar( kProgressCaptionName, "Refresh AssetDatabase...", 1);
+				catch( System.Exception e)
+				{
+					Debug.LogError( e);
+				}
 				AssetDatabase.Refresh();
 				EditorUtility.ClearProgressBar();
 				

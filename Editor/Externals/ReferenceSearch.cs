@@ -413,7 +413,7 @@ public sealed class Search
 	{
 		EditorUtility.ClearProgressBar();
 	}
-#if true
+#if false
 	[MenuItem("Tools/Log Serialized Assets")]
     private static void LogSerializedAssets2()
     {
