@@ -1,28 +1,50 @@
 # Finder
 
-Unity が管理しているアセットを見つける補助ツールです。
+Unity が管理しているアセットを見つける補助ツールのパッケージです。
 
-## インストール方法
+---
 
+### インストール方法
 
-### PackageManagerを使用する場合
+Windows の場合はコマンドプロンプト、Mac、Linux の場合はターミナルで  
+`git` のコマンドが実行可能な状態か確認してから行って下さい。
 
-Packages/manifest.json に以下を追加してください。
+パッケージをインストールしたい Unity プロジェクトの  
+Packages/manifest.json をテキストエディタで開きます。
+
+開いたら "dependencies" ノード内に以下を追加してください。
 
 ```
-"com.devknit.finder": "https://github.com/devknit/FinderPackage.git"
+"com.devknit.finder": "https://github.com/devknit/FinderPackage.git",
 ```
-※gitのコマンドが実行可能な状態で行って下さい。
 
-パッケージの更新を行う場合は Packages/manifest.json の  
-"lock" ノードの対象パッケージに関する記述を削除してください。
+![](Documentation/install.gif)
 
-### PackageManagerを使用しない場合
+追加した状態を保存後、Unity にフォーカスを当てると
+パッケージのインストールが行われます。
 
-Editor フォルダを Assets以下に配置してください。
+インストールが正しく行わると `Projectウィンドウ` の `Packages` に  
+`Finder` が追加されていることが確認できます。
 
-## 起動方法
+![](Documentation/install.png)
+
+---
+
+### 起動方法
 
 Unity のメニューに Tools > Finder > Open から起動できます。
-ショートカットキーは　ALT + F になります。
+ショートカットキーの　ALT + F でも起動することが可能です。
 
+---
+
+### アップデート方法
+
+パッケージがインストールされている Unity プロジェクトの
+Packages/manifest.json をテキストエディタで開きます。
+
+開いたら "lock" ノード内にある "com.devknit.finder" を削除してください。
+
+![](Documentation/update.gif)
+
+削除した状態を保存後、Unity にフォーカスを当てると
+パッケージのアップデートが行われます。
