@@ -275,7 +275,7 @@ public sealed class Explorer : ISerializationCallbackReceiver
 						}
 						EditorGUIUtility.systemCopyBuffer = builder.ToString();
 					});
-					contextMenu.AddItem( new GUIContent( "Export Package"), false, () =>
+					contextMenu.AddItem( new GUIContent( "Export Package/Select Only"), false, () =>
 					{
 						var assetPaths = view.SelectSelectedElements( x => x.IsFile(), x => x.path).ToArray();
 						if( assetPaths.Length > 0)
@@ -286,6 +286,20 @@ public sealed class Explorer : ISerializationCallbackReceiver
 							if( string.IsNullOrEmpty( savePath) == false)
 							{
 								AssetDatabase.ExportPackage( assetPaths, savePath, ExportPackageOptions.Default | ExportPackageOptions.Interactive);
+							}
+						}
+					});
+					contextMenu.AddItem( new GUIContent( "Export Package/Include Dependencies"), false, () =>
+					{
+						var assetPaths = view.SelectSelectedElements( x => x.IsFile(), x => x.path).ToArray();
+						if( assetPaths.Length > 0)
+						{
+							string directory = System.IO.Path.GetFullPath( "Assets/../");
+							string fileName = System.DateTime.Now.ToString( "yyyy-MM-dd_HH-mm-ss");
+							string savePath = EditorUtility.SaveFilePanel( "Export Package", directory, fileName, "unitypackage");
+							if( string.IsNullOrEmpty( savePath) == false)
+							{
+								AssetDatabase.ExportPackage( assetPaths, savePath, ExportPackageOptions.IncludeDependencies | ExportPackageOptions.Interactive);
 							}
 						}
 					});
