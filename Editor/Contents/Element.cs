@@ -197,6 +197,10 @@ public sealed class Element
 			element.depth = 0;
 		}
 	}
+	public bool IsFile()
+	{
+		return directory == false && type != AssetType.kComponent;
+	}
 	public bool CheckFilter( SearchFilter filter)
 	{
 		bool bValid = false;

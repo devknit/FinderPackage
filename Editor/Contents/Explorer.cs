@@ -275,6 +275,20 @@ public sealed class Explorer : ISerializationCallbackReceiver
 						}
 						EditorGUIUtility.systemCopyBuffer = builder.ToString();
 					});
+					contextMenu.AddItem( new GUIContent( "Export Package"), false, () =>
+					{
+						var assetPaths = view.SelectSelectedElements( x => x.IsFile(), x => x.path).ToArray();
+						if( assetPaths.Length > 0)
+						{
+							string directory = System.IO.Path.GetFullPath( "Assets/../");
+							string fileName = System.DateTime.Now.ToString( "yyyy-MM-dd_HH-mm-ss");
+							string savePath = EditorUtility.SaveFilePanel( "Export Package", directory, fileName, "unitypackage");
+							if( string.IsNullOrEmpty( savePath) == false)
+							{
+								AssetDatabase.ExportPackage( assetPaths, savePath, ExportPackageOptions.Default | ExportPackageOptions.Interactive);
+							}
+						}
+					});
 					if( selectedCount == 1)
 					{
 						contextMenu.AddItem( new GUIContent( "Ping"), false,

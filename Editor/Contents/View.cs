@@ -213,6 +213,10 @@ public sealed class View : TreeView
 	{
 		return GetRows().Where( x => ids.Contains( x.id));
 	}
+	public IEnumerable<TreeViewItem> FindRowElements( System.Func<Element, bool> onWhere)
+	{
+		return GetRows().Where( x => onWhere?.Invoke( x as Element) ?? false);
+	}
 	public bool ContainsSeelctedElements<T>( T value, System.Func<Element, T> onComparer)
 	{
 		if( state.selectedIDs.Count > 0)
@@ -239,6 +243,23 @@ public sealed class View : TreeView
 		if( state.selectedIDs.Count > 0)
 		{
 			return FindRowElements( state.selectedIDs).Select( x => onSelector( x as Element));
+		}
+		return null;
+	}
+	public IEnumerable<T> SelectSelectedElements<T>( System.Func<Element, bool> onWhere, System.Func<Element, T> onSelector)
+	{
+		if( state.selectedIDs.Count > 0)
+		{
+			List<int> ids = state.selectedIDs;
+			return FindRowElements( (element) =>
+			{
+				if( ids.Contains( element.id) != false)
+				{
+					return onWhere?.Invoke( element) ?? true;
+				}
+				return false;
+				
+			}).Select( x => onSelector( x as Element));
 		}
 		return null;
 	}
