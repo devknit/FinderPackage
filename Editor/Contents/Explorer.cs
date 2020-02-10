@@ -25,13 +25,13 @@ public sealed class Explorer : ISerializationCallbackReceiver
 		if( EditorGUIUtility.isProSkin == false)
 		{
 		//	listTexture = AssetDatabase.GUIDToAssetPath( "ecd3c38ceb9b5f2469b3da8ee9386ad1");
-			treeTexture = "UnityEditor.HierarchyWindow";
+		//	treeTexture = "UnityEditor.HierarchyWindow";
 			typeTexture = "FilterByType";
 		}
 		else
 		{
 		//	listTexture = AssetDatabase.GUIDToAssetPath( "b85dfab077e810344919c003de51ea9a");
-			treeTexture = "d_UnityEditor.HierarchyWindow";
+		//	treeTexture = "d_UnityEditor.HierarchyWindow";
 			typeTexture = "d_FilterByType";
 		}
 		
@@ -67,13 +67,13 @@ public sealed class Explorer : ISerializationCallbackReceiver
 	public void Apply( List<Element> src)
 	{
 		elements = src;
-		view.Apply( elements, viewType);
+		view.Apply( elements, View.Type.kTree);
 	}
 	public void Apply()
 	{
 		if( elements != null)
 		{
-			view.Apply( elements, viewType);
+			view.Apply( elements, View.Type.kTree);
 		}
 	}
 	public void ExpandAll()
@@ -452,8 +452,8 @@ public sealed class Explorer : ISerializationCallbackReceiver
 	MultiColumnHeaderState headerState;
 	[SerializeField]
 	SerializableElementRoot serializableElement;
-	[SerializeField]
-	View.Type viewType;
+//	[SerializeField]
+//	View.Type viewType;
 	[SerializeField]
 	string searchString;
 	
@@ -470,8 +470,8 @@ public sealed class Explorer : ISerializationCallbackReceiver
 	
 //	[System.NonSerialized]
 //	string listTexture;
-	[System.NonSerialized]
-	string treeTexture;
+//	[System.NonSerialized]
+//	string treeTexture;
 	[System.NonSerialized]
 	string typeTexture;
 }
