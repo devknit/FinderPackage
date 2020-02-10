@@ -24,13 +24,13 @@ public sealed class Explorer : ISerializationCallbackReceiver
 	{
 		if( EditorGUIUtility.isProSkin == false)
 		{
-			listTexture = AssetDatabase.GUIDToAssetPath( "ecd3c38ceb9b5f2469b3da8ee9386ad1");
+		//	listTexture = AssetDatabase.GUIDToAssetPath( "ecd3c38ceb9b5f2469b3da8ee9386ad1");
 			treeTexture = "UnityEditor.HierarchyWindow";
 			typeTexture = "FilterByType";
 		}
 		else
 		{
-			listTexture = AssetDatabase.GUIDToAssetPath( "b85dfab077e810344919c003de51ea9a");
+		//	listTexture = AssetDatabase.GUIDToAssetPath( "b85dfab077e810344919c003de51ea9a");
 			treeTexture = "d_UnityEditor.HierarchyWindow";
 			typeTexture = "d_FilterByType";
 		}
@@ -121,6 +121,8 @@ public sealed class Explorer : ISerializationCallbackReceiver
 		{
 			using( new EditorGUILayout.HorizontalScope( EditorStyles.toolbar))
 			{
+			/* リスト表示廃止に伴い無効化 */
+			#if false
 				int mouseButton;
 				
 				mouseButton = GUIExpansion.Toggle( viewType == View.Type.kTree, 
@@ -179,7 +181,7 @@ public sealed class Explorer : ISerializationCallbackReceiver
 					}
 				}
 				GUILayout.Space( 6);
-				
+			#endif
 			#if false
 				if( viewType == View.Type.kList)
 				{
@@ -466,8 +468,8 @@ public sealed class Explorer : ISerializationCallbackReceiver
 	[System.NonSerialized]
 	PopupList.InputData objectTypes;
 	
-	[System.NonSerialized]
-	string listTexture;
+//	[System.NonSerialized]
+//	string listTexture;
 	[System.NonSerialized]
 	string treeTexture;
 	[System.NonSerialized]

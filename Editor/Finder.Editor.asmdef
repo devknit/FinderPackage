@@ -1,7 +1,7 @@
 {
     "name": "Finder.Editor",
     "references": [
-        "GUID:19cea5d4759afcb44aa64426fea49b1b"
+        "GUID:4b1bfff92d08bba47b9655aca56351c9"
     ],
     "includePlatforms": [
         "Editor"
@@ -12,5 +12,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [],
+    "noEngineReferences": false
 }

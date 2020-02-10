@@ -265,7 +265,7 @@ public sealed class Contents
 	[SerializeField]
 	string[] targetGuids;
 	[SerializeField]
-	ClickType clickType;
+	ClickType clickType = ClickType.kActiveFileOnly;
 	[SerializeField]
 	bool initialized;
 	
