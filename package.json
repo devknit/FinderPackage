@@ -9,6 +9,6 @@
 	],
     "category": "Editor",
     "dependencies":{
-		"com.devknit.usubwindow": "https://github.com/devknit/USubWindowPackage.git"
+		"com.devknit.usubwindow": "https://github.com/devknit/usubwindowpackage.git"
     }
 }
