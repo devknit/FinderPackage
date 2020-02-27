@@ -15,14 +15,6 @@ public enum SearchType
 	kTracePrecedents,
 	kTraceDependents
 }
-public enum ClickType
-{
-	kNone,
-	kPing,
-	kPingFileOnly,
-	kActive,
-	kActiveFileOnly
-}
 
 [System.Serializable]
 public sealed class Contents
@@ -33,19 +25,19 @@ public sealed class Contents
 		{
 			project = new Explorer( GetAllAssetElements(), View.Column.kName);
 		}
-		project.OnEnable( OnClick);
+		project.OnEnable( clickType);
 		
 		if( target == null)
 		{
 			target = new Explorer( new List<Element>(), View.Column.kName | View.Column.kReference);
 		}
-		target.OnEnable( OnClick);
+		target.OnEnable( clickType);
 		
 		if( search == null)
 		{
 			search = new Explorer( new List<Element>(), View.Column.kDefault);
 		}
-		search.OnEnable( OnClick);
+		search.OnEnable( clickType);
 		
 		onCreateWindowContens = createWindowContens;
 		
@@ -74,7 +66,14 @@ public sealed class Contents
 	}
 	public void OnToolbarGUI()
 	{
-		clickType = (ClickType)EditorGUILayout.Popup( (int)clickType, kClickTypes, EditorStyles.toolbarPopup, GUILayout.Width( 100));
+		var newClickType = (ClickType)EditorGUILayout.Popup( (int)clickType, kClickTypes, EditorStyles.toolbarPopup, GUILayout.Width( 100));
+		if( clickType != newClickType)
+		{
+			project.SetClickType( newClickType);
+			target.SetClickType( newClickType);
+			search.SetClickType( newClickType);
+			clickType = newClickType;
+		}
 	}
 	public void OnProjectChange()
 	{
@@ -148,32 +147,6 @@ public sealed class Contents
 			}
 		}
 		return builder.ToList();
-	}
-	void OnClick( Element element)
-	{
-		switch( clickType)
-		{
-			case ClickType.kPing:
-			{
-				element.PingObject( true);
-				break;
-			}
-			case ClickType.kPingFileOnly:
-			{
-				element.PingObject( false);
-				break;
-			}
-			case ClickType.kActive:
-			{
-				element.ActiveObject( true);
-				break;
-			}
-			case ClickType.kActiveFileOnly:
-			{
-				element.ActiveObject( false);
-				break;
-			}
-		}
 	}
 	public void OpenSearchAssets( IEnumerable<string> assetGuids, SearchType newSearchType)
 	{

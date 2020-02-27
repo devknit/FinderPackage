@@ -20,7 +20,7 @@ public sealed class Explorer : ISerializationCallbackReceiver
 		serializableElement = new SerializableElementRoot();
 		elements = src;
 	}
-	public void OnEnable( System.Action<Element> onClickCallback)
+	public void OnEnable( ClickType clickType)
 	{
 		if( EditorGUIUtility.isProSkin == false)
 		{
@@ -45,7 +45,8 @@ public sealed class Explorer : ISerializationCallbackReceiver
 		
 		searchFilter = new SearchFilter( OnFilterChange);
 		
-		view = new View( viewState, new MultiColumnHeader( headerState), searchFilter, onClickCallback);
+		view = new View( viewState, new MultiColumnHeader( headerState), searchFilter);
+		view.SetClickType( clickType);
 		
 		searchField = new SearchField();
 		searchField.downOrUpArrowKeyPressed += view.SetFocusAndEnsureSelectedItem;
@@ -63,6 +64,10 @@ public sealed class Explorer : ISerializationCallbackReceiver
 	public void OnDisable()
 	{
 		searchField.downOrUpArrowKeyPressed -= view.SetFocusAndEnsureSelectedItem;
+	}
+	public void SetClickType( ClickType type)
+	{
+		view.SetClickType( type);
 	}
 	public void Apply( List<Element> src)
 	{

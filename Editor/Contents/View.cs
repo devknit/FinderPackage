@@ -10,6 +10,14 @@ using UnityEditorInternal;
 
 namespace Finder {
 
+public enum ClickType
+{
+	kNone,
+	kPing,
+	kPingFileOnly,
+	kActive,
+	kActiveFileOnly
+}
 public sealed class View : TreeView
 {
 	public enum Type
@@ -102,8 +110,7 @@ public sealed class View : TreeView
 	}
 	public View( TreeViewState treeViewState, 
 		MultiColumnHeader multiColumnHeader, 
-		SearchFilter exploereSearchFilter,
-		System.Action<Element> onClickCallback) :
+		SearchFilter exploereSearchFilter) :
 		base( treeViewState, multiColumnHeader) 
 	{
 		searchFilter = (exploereSearchFilter != null)? 
@@ -124,9 +131,10 @@ public sealed class View : TreeView
 						extendElement = extendElement.parentElement;
 					}
 				}
-				/* 選択されたアセットを Ping、または ActiveObject にする */
-				/* LoadMainAssetAtPath でロードしたくないけど他に方法が... */
-				onClickCallback?.Invoke( element);
+				if( clickType <= ClickType.kPingFileOnly)
+				{
+					element.PingObject( clickType == ClickType.kPing);
+				}
 			}
 			var visibleRows = GetRows();
 			var allIDs = visibleRows.Select( x => x.id).ToList();
@@ -138,6 +146,10 @@ public sealed class View : TreeView
 		};
 		multiColumnHeader.height = EditorGUIUtility.singleLineHeight + 4;
 		multiColumnHeader.sortingChanged += OnSortingChanged;
+	}
+	public void SetClickType( ClickType type)
+	{
+		clickType = type;
 	}
 	public void Apply( List<Element> src, Type viewType)
 	{
@@ -296,6 +308,35 @@ public sealed class View : TreeView
 			{
 				GUIExpansion.ReleaseKeyControl( ev.keyCode);
 				break;
+			}
+		}
+	}
+	protected override void SelectionChanged( IList<int> selectedIds)
+	{
+		if( clickType >= ClickType.kActive)
+		{
+			var newSelections = GetRows().Where( (x) =>
+			{
+				if( x is Element element)
+				{
+					if( selectedIds.Contains( element.id) != false)
+					{
+						if( clickType == ClickType.kActiveFileOnly)
+						{
+							return element.IsFile();
+						}
+						return true;
+					}
+				}
+				return false;
+			}).Select( (x) =>
+			{
+				return AssetDatabase.LoadMainAssetAtPath( (x as Element).path);
+			}).ToArray();
+			
+			if( newSelections.Length > 0)
+			{
+				Selection.objects = newSelections;
 			}
 		}
 	}
@@ -505,7 +546,7 @@ public sealed class View : TreeView
 	Action<List<Element>, IList<TreeViewItem>> buildFilterRows;
 	SearchFilter searchFilter;
 	List<Element> elements;
-	Type displayType;
+	ClickType clickType;
 }
 
 } /* namespace Finder */
