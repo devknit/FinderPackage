@@ -89,27 +89,40 @@ internal sealed class MaterialCleaner
 		var properties = MaterialEditor.GetMaterialProperties( new Material[] { material });
 		for( int i0 = 0; i0 < properties.Length; ++i0)
 		{
-			SetPropertyToMaterial( newMaterial, properties[ i0]);
+			SetPropertyToMaterial( newMaterial, properties[ i0], null);
 		}
-
+		
 		string tempPath = AssetDatabase.GenerateUniqueAssetPath( path);
 		AssetDatabase.CreateAsset( newMaterial, tempPath);
 		FileUtil.ReplaceFile( tempPath, path);
 		AssetDatabase.DeleteAsset( tempPath);
 	}
-	static void SetPropertyToMaterial( Material material, MaterialProperty property)
+	static void CopyPropertyToMaterial( Material material, MaterialProperty[] properties, string srcPropertyName, string dstPropertyName)
 	{
+		var src = properties.FirstOrDefault( p => p.name.Equals( srcPropertyName));
+		var dst = properties.FirstOrDefault( p => p.name.Equals( dstPropertyName));
+		if( src != null && dst != null)
+		{
+			SetPropertyToMaterial( material, src, dst.name);
+		}
+	}
+	static void SetPropertyToMaterial( Material material, MaterialProperty property, string propertyName)
+	{
+		if( propertyName == null)
+		{
+			propertyName = property.name;
+		}
 		switch( property.type)
 		{
 			case MaterialProperty.PropType.Color:
 			{
-				material.SetColor( property.name, property.colorValue);
+				material.SetColor( propertyName, property.colorValue);
 				break;
 			}
 			case MaterialProperty.PropType.Float:
 			case MaterialProperty.PropType.Range:
 			{
-				material.SetFloat( property.name, property.floatValue);
+				material.SetFloat( propertyName, property.floatValue);
 				break;
 			}
 			case MaterialProperty.PropType.Texture:
@@ -120,18 +133,18 @@ internal sealed class MaterialCleaner
 				{
 					texture = property.textureValue;
 				}
-				material.SetTexture( property.name, texture);
+				material.SetTexture( propertyName, texture);
 				
 				if( (property.flags & MaterialProperty.PropFlags.NoScaleOffset) != MaterialProperty.PropFlags.NoScaleOffset)
 				{
-					material.SetTextureScale( property.name, new Vector2( property.textureScaleAndOffset.x, property.textureScaleAndOffset.y));
-					material.SetTextureOffset( property.name, new Vector2( property.textureScaleAndOffset.z, property.textureScaleAndOffset.w));
+					material.SetTextureScale( propertyName, new Vector2( property.textureScaleAndOffset.x, property.textureScaleAndOffset.y));
+					material.SetTextureOffset( propertyName, new Vector2( property.textureScaleAndOffset.z, property.textureScaleAndOffset.w));
 				}
 				break;
 			}
 			case MaterialProperty.PropType.Vector:
 			{
-				material.SetVector( property.name, property.vectorValue);
+				material.SetVector( propertyName, property.vectorValue);
 				break;
 			}
 		}
