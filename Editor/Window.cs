@@ -9,12 +9,12 @@ namespace Finder {
 
 public sealed partial class Window : MDIEditorWindow, IHasCustomMenu
 {
-	[MenuItem ("Tools/Finder/Open &f")]
+	[MenuItem( "Tools/Finder/Open")]
 	static void Open()
 	{
 		CreateNewWindow<Window>().Show();
 	}
-	[MenuItem ("Tools/Finder/Closes")]
+	[MenuItem( "Tools/Finder/Closes")]
 	static void Closes()
 	{
 		if( activeWindows != null)
@@ -28,33 +28,38 @@ public sealed partial class Window : MDIEditorWindow, IHasCustomMenu
 			activeWindows = null;
 		}
 	}
-	[MenuItem("Assets/Finder/Check Missing", false)]
+	[MenuItem( "Assets/Assets/Finder/Open &f")]
+	static void OpenFinder()
+	{
+		CreateNewWindow<Window>().Show();
+	}
+	[MenuItem("Assets/Assets/Finder/Check Missing", false)]
 	static void CheckMissing()
 	{
 		var window = CreateNewWindow<Window>();
 		window.Show();
 		window.contents.SearchAssets( Selection.assetGUIDs, SearchType.kCheckMissing);
 	}
-	[MenuItem("Assets/Finder/Trace Precedents", false)]
+	[MenuItem("Assets/Assets/Finder/Trace Precedents", false)]
 	static void TracePrecedents()
 	{
 		var window = CreateNewWindow<Window>();
 		window.Show();
 		window.contents.SearchAssets( Selection.assetGUIDs, SearchType.kTracePrecedents);
 	}
-	[MenuItem("Assets/Finder/Trace Dependents", false)]
+	[MenuItem("Assets/Assets/Finder/Trace Dependents", false)]
 	static void TraceDependents()
 	{
 		var window = CreateNewWindow<Window>();
 		window.Show();
 		window.contents.SearchAssets( Selection.assetGUIDs, SearchType.kTraceDependents);
 	}
-	[MenuItem("Assets/Finder/Trace Precedents", true)]
+	[MenuItem("Assets/Assets/Finder/Trace Precedents", true)]
 	static bool IsTracePrecedents()
 	{
 		return Selection.assetGUIDs?.Length > 0;
 	}
-	[MenuItem("Assets/Finder/Trace Dependents", true)]
+	[MenuItem("Assets/Assets/Finder/Trace Dependents", true)]
 	static bool IsTraceDependents()
 	{
 		return Selection.assetGUIDs?.Length > 0;
