@@ -21,6 +21,8 @@ public sealed class Contents
 {
 	public void OnEnable( System.Func<Contents> createWindowContens)
 	{
+		changeProject = true;
+		
 		if( project == null)
 		{
 			project = new Explorer( GetAllAssetElements(), View.Column.kName);
@@ -77,10 +79,15 @@ public sealed class Contents
 	}
 	public void OnProjectChange()
 	{
-		project.Apply( GetAllAssetElements());
+		changeProject = true;
 	}
 	public void OnProjectGUI()
 	{
+		if( changeProject != false)
+		{
+			project.Apply( GetAllAssetElements());
+			changeProject = false;
+		}
 		project.OnGUI( this);
 	}
 	public void OnTargetGUI()
@@ -231,6 +238,8 @@ public sealed class Contents
 	[SerializeField]
 	Explorer target;
 	
+	[SerializeField]
+	bool changeProject;
 	[SerializeField]
 	bool recursive;
 	[SerializeField]
