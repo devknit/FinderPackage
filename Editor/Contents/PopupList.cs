@@ -2,130 +2,139 @@
 using System;
 using UnityEngine;
 using UnityEditor;
-using UnityEditorInternal;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace Finder {
-
-public class PopupList : PopupWindowContent
+namespace Finder
 {
-	public class Element
+	public class PopupList : PopupWindowContent
 	{
-		public Element( string text)
+		public class Element
 		{
-			content = new GUIContent( text);
-		}
-		public GUIContent content;
-		public bool selected;
-		public string label{ get{ return content.text; } }
-	}
-	public class InputData
-	{
-		public InputData()
-		{
-			elements = new List<Element>();
-		}
-		public Element NewOrMatchingElement( string label)
-		{
-			foreach( var element in elements)
+			public Element( string text)
 			{
-				if( element.label.Equals( label, StringComparison.OrdinalIgnoreCase) != false)
-				{
-					return element;
-				}
+				m_Content = new GUIContent( text);
 			}
-			var newElement = new Element( label);
-			elements.Add( newElement);
-			
-			return newElement;
-		}
-		public List<Element> elements;
-		public Action<Element> onSelectCallback;
-	}
-	public PopupList( InputData inputData)
-	{
-		data = inputData;
-	}
-	public override Vector2 GetWindowSize()
-	{
-		return new Vector2( kWindowWidth, data.elements.Count * kLineHeight + 2 * kMargin);
-	}
-	public override void OnGUI( Rect windowRect)
-	{
-		Event ev = Event.current;
-		
-		if( ev.type == EventType.Layout)
-		{
-			return;
-		}
-		if( styles == null)
-		{
-			styles = new Styles();
-		}
-		if( ev.type == EventType.KeyDown && ev.keyCode == KeyCode.Escape)
-		{
-			editorWindow.Close();
-			GUIUtility.ExitGUI();
-		}
-		int i0 = 0;
-		
-		foreach( Element element in data.elements)
-		{
-			Rect rect = new Rect(
-				windowRect.x, 
-				windowRect.y + kMargin + i0 * kLineHeight, 
-				windowRect.width, 
-				kLineHeight);
-			
-			switch( ev.type)
+			public string Label
 			{
-				case EventType.Repaint:
-				{
-					bool selected = element.selected;
-					bool hover = i0 == selectedIndex;
-					styles.menuItem.Draw( rect, element.content, hover, selected, selected, false);
-					break;
-				}
-				case EventType.MouseDown:
-				{
-					if( ev.button == 0 && rect.Contains( ev.mousePosition) != false)
-					{
-						data.onSelectCallback?.Invoke( element);
-						ev.Use();
-					}
-					break;
-				}
-				case EventType.MouseMove:
-				{
-					if( rect.Contains( ev.mousePosition) != false)
-					{
-						selectedIndex = i0;
-						ev.Use();
-					}
-					break;
-				}
+				get{ return m_Content.text; }
 			}
-			++i0;
+			public GUIContent Content
+			{
+				get{ return m_Content; }
+			}
+			public bool Selected
+			{
+				get{ return m_Selected; }
+				internal set{ m_Selected = value; }
+			}
+            readonly GUIContent m_Content;
+			bool m_Selected;
 		}
-		if( ev.type == EventType.Repaint)
+		public class InputData
 		{
-			styles.background.Draw( windowRect, false, false, false, false);
+			public InputData()
+			{
+				elements = new List<Element>();
+			}
+			public Element NewOrMatchingElement( string label)
+			{
+				foreach( var element in elements)
+				{
+					if( element.Label.Equals( label, StringComparison.OrdinalIgnoreCase) != false)
+					{
+						return element;
+					}
+				}
+				var newElement = new Element( label);
+				elements.Add( newElement);
+				
+				return newElement;
+			}
+			public List<Element> elements;
+			public Action<Element> onSelectCallback;
 		}
+		public PopupList( InputData inputData)
+		{
+			m_InputData = inputData;
+		}
+		public override Vector2 GetWindowSize()
+		{
+			return new Vector2( kWindowWidth, m_InputData.elements.Count * kLineHeight + 2 * kMargin);
+		}
+		public override void OnGUI( Rect windowRect)
+		{
+			Event ev = Event.current;
+			
+			if( ev.type == EventType.Layout)
+			{
+				return;
+			}
+			if( s_Styles == null)
+			{
+				s_Styles = new Styles();
+			}
+			if( ev.type == EventType.KeyDown && ev.keyCode == KeyCode.Escape)
+			{
+				editorWindow.Close();
+				GUIUtility.ExitGUI();
+			}
+			int i0 = 0;
+			
+			foreach( Element element in m_InputData.elements)
+			{
+				var rect = new Rect(
+					windowRect.x, 
+					windowRect.y + kMargin + i0 * kLineHeight, 
+					windowRect.width, 
+					kLineHeight);
+				
+				switch( ev.type)
+				{
+					case EventType.Repaint:
+					{
+						bool selected = element.Selected;
+						bool hover = i0 == m_SelectedIndex;
+						s_Styles.menuItem.Draw( rect, element.Content, hover, selected, selected, false);
+						break;
+					}
+					case EventType.MouseDown:
+					{
+						if( ev.button == 0 && rect.Contains( ev.mousePosition) != false)
+						{
+							m_InputData.onSelectCallback?.Invoke( element);
+							ev.Use();
+						}
+						break;
+					}
+					case EventType.MouseMove:
+					{
+						if( rect.Contains( ev.mousePosition) != false)
+						{
+							m_SelectedIndex = i0;
+							ev.Use();
+						}
+						break;
+					}
+				}
+				++i0;
+			}
+			if( ev.type == EventType.Repaint)
+			{
+				s_Styles.background.Draw( windowRect, false, false, false, false);
+			}
+		}
+		const float kWindowWidth = 150;
+		const float kLineHeight = 16;
+		const float kMargin = 10;
+		
+		class Styles
+		{
+			public GUIStyle menuItem = "MenuItem";
+			public GUIStyle background = "grey_border";
+		}
+		static Styles s_Styles;
+		
+		readonly InputData m_InputData;
+		int m_SelectedIndex;
 	}
-	const float kWindowWidth = 150;
-	const float kLineHeight = 16;
-	const float kMargin = 10;
-	
-	class Styles
-	{
-		public GUIStyle menuItem = "MenuItem";
-		public GUIStyle background = "grey_border";
-	}
-	static Styles styles;
-	
-	InputData data;
-	int selectedIndex;
 }
-
-} /* namespace Finder */

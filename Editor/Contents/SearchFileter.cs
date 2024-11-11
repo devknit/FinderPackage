@@ -1,184 +1,183 @@
 ﻿
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
-namespace Finder {
-
-public sealed class SearchFilter
+namespace Finder
 {
-	public bool valid
+	public sealed class SearchFilter
 	{
-		get;
-		private set;
-	}
-	public void Change( string value)
-	{
-		valid = false;
-		
-		names.Clear();
-		paths.Clear();
-		types.Clear();
-		
-		if( value != null)
+		public bool Valid
 		{
-			value = value.Trim();
+			get;
+			private set;
+		}
+		public void Change( string value)
+		{
+			Valid = false;
 			
-			if( value.Length > 0)
+			m_Names.Clear();
+			m_Paths.Clear();
+			m_Types.Clear();
+			
+			if( value != null)
 			{
-				string[] argv = value.Split( ' ');
-				AssetType type;
-				string arg;
+				value = value.Trim();
 				
-				for( int i0 = 0; i0 < argv.Length; ++i0)
+				if( value.Length > 0)
 				{
-					arg = argv[ i0];
+					string[] argv = value.Split( ' ');
+					string arg;
 					
-					if( AssetTypes.kFilters.TryGetValue( arg, out type) != false)
+					for( int i0 = 0; i0 < argv.Length; ++i0)
 					{
-						if( types.ContainsKey( type) == false)
+						arg = argv[ i0];
+						
+						if( AssetTypes.kFilters.TryGetValue( arg, out AssetType type) != false)
 						{
-							types.Add( type, arg.Substring( 2, arg.Length - 2));
-						}
-					}
-					else
-					{
-						if( arg.IndexOf( "p:~/", StringComparison.OrdinalIgnoreCase) >= 0)
-						{
-							arg = arg.Substring( 4, arg.Length - 4);
-							
-							if( arg.Length > 0 && paths.ContainsKey( arg) == false)
+							if( m_Types.ContainsKey( type) == false)
 							{
-								paths.Add( arg, 0);
+								m_Types.Add( type, arg.Substring( 2, arg.Length - 2));
 							}
 						}
-						else if( arg.IndexOf( "p:", StringComparison.OrdinalIgnoreCase) >= 0)
+						else
 						{
-							arg = arg.Substring( 2, arg.Length - 2);
-							
-							if( arg.Length > 0 && paths.ContainsKey( arg) == false)
+							if( arg.IndexOf( "p:~/", StringComparison.OrdinalIgnoreCase) >= 0)
 							{
-								paths.Add( arg, 1);
+								arg = arg.Substring( 4, arg.Length - 4);
+								
+								if( arg.Length > 0 && m_Paths.ContainsKey( arg) == false)
+								{
+									m_Paths.Add( arg, 0);
+								}
+							}
+							else if( arg.IndexOf( "p:", StringComparison.OrdinalIgnoreCase) >= 0)
+							{
+								arg = arg.Substring( 2, arg.Length - 2);
+								
+								if( arg.Length > 0 && m_Paths.ContainsKey( arg) == false)
+								{
+									m_Paths.Add( arg, 1);
+								}
+							}
+							else if( m_Names.Contains( arg) == false)
+							{
+								m_Names.Add( arg);
 							}
 						}
-						else if( names.Contains( arg) == false)
-						{
-							names.Add( arg);
-						}
 					}
-				}
-				if( names.Count > 0 || paths.Count > 0 || types.Count > 0)
-				{
-					valid = true;
-				}
-			}
-		}
-		onChangeCallback?.Invoke( valid);
-	}
-	public bool Check( Element element)
-	{
-		if( valid != false)
-		{
-			if( types.Count > 0)
-			{
-				if( types.ContainsKey( element.type) == false)
-				{
-					return false;
-				}
-			}
-			if( paths.Count > 0)
-			{
-				bool check = false;
-				
-				foreach( var path in paths)
-				{
-					if( path.Value == 0)
+					if( m_Names.Count > 0 || m_Paths.Count > 0 || m_Types.Count > 0)
 					{
-						if( element.path.IndexOf( path.Key, StringComparison.OrdinalIgnoreCase) == 0)
-						{
-							check = true;
-							break;
-						}
+						Valid = true;
 					}
-					else if( path.Value == 1)
+				}
+			}
+			m_OnChangeCallback?.Invoke( Valid);
+		}
+		public bool Check( Element element)
+		{
+			if( Valid != false)
+			{
+				if( m_Types.Count > 0)
+				{
+					if( m_Types.ContainsKey( element.AssetType) == false)
 					{
-						if( element.path.IndexOf( path.Key, StringComparison.OrdinalIgnoreCase) >= 0)
-						{
-							check = true;
-							break;
-						}
+						return false;
 					}
 				}
-				if( check == false)
+				if( m_Paths.Count > 0)
 				{
-					return false;
+					bool check = false;
+					
+					foreach( var path in m_Paths)
+					{
+						if( path.Value == 0)
+						{
+							if( element.Path.IndexOf( path.Key, StringComparison.OrdinalIgnoreCase) == 0)
+							{
+								check = true;
+								break;
+							}
+						}
+						else if( path.Value == 1)
+						{
+							if( element.Path.IndexOf( path.Key, StringComparison.OrdinalIgnoreCase) >= 0)
+							{
+								check = true;
+								break;
+							}
+						}
+					}
+					if( check == false)
+					{
+						return false;
+					}
+				}
+				foreach( var name in m_Names)
+				{
+					if( element.name.IndexOf( name, StringComparison.OrdinalIgnoreCase) < 0)
+					{
+						return false;
+					}
 				}
 			}
-			foreach( var name in names)
+			return true;
+		}
+		public bool ContainsTypeValue( string value)
+		{
+			return m_Types.ContainsValue( value);
+		}
+		public void ToBuildStringNames( System.Text.StringBuilder builder)
+		{
+			foreach( var name in m_Names)
 			{
-				if( element.name.IndexOf( name, StringComparison.OrdinalIgnoreCase) < 0)
+				if( builder.Length > 0)
 				{
-					return false;
+					builder.Append( " ");
 				}
+				builder.Append( name);
 			}
 		}
-		return true;
-	}
-	public void ToBuildStringNames( System.Text.StringBuilder builder)
-	{
-		foreach( var name in names)
+		public void ToBuildStringPaths( System.Text.StringBuilder builder)
 		{
-			if( builder.Length > 0)
+			foreach( var path in m_Paths)
 			{
-				builder.Append( " ");
+				if( builder.Length > 0)
+				{
+					builder.Append( " ");
+				}
+				if( path.Value == 0)
+				{
+					builder.Append( "p:~/");
+				}
+				else if( path.Value == 1)
+				{
+					builder.Append( "p:");
+				}
+				builder.Append( path.Key);
 			}
-			builder.Append( name);
 		}
-	}
-	public void ToBuildStringPaths( System.Text.StringBuilder builder)
-	{
-		foreach( var path in paths)
+		public void ToBuildStringTypes( System.Text.StringBuilder builder)
 		{
-			if( builder.Length > 0)
+			foreach( var type in m_Types.Values)
 			{
-				builder.Append( " ");
+				if( builder.Length > 0)
+				{
+					builder.Append( " ");
+				}
+				builder.Append( "t:");
+				builder.Append( type);
 			}
-			if( path.Value == 0)
-			{
-				builder.Append( "p:~/");
-			}
-			else if( path.Value == 1)
-			{
-				builder.Append( "p:");
-			}
-			builder.Append( path.Key);
 		}
-	}
-	public void ToBuildStringTypes( System.Text.StringBuilder builder)
-	{
-		foreach( var type in types.Values)
+		public SearchFilter( Action<bool> onFilterChange=null)
 		{
-			if( builder.Length > 0)
-			{
-				builder.Append( " ");
-			}
-			builder.Append( "t:");
-			builder.Append( type);
+			m_Names = new List<string>();
+			m_Paths = new Dictionary<string, int>();
+			m_Types = new Dictionary<AssetType, string>();
+			m_OnChangeCallback = onFilterChange;
 		}
+        readonly List<string> m_Names;
+		readonly Dictionary<string, int> m_Paths;
+		readonly Dictionary<AssetType, string> m_Types;
+		Action<bool> m_OnChangeCallback;
 	}
-	public SearchFilter( Action<bool> onFilterChange=null)
-	{
-		names = new List<string>();
-		paths = new Dictionary<string, int>();
-		types = new Dictionary<AssetType, string>();
-		onChangeCallback = onFilterChange;
-	}
-	
-	public List<string> names;
-	public Dictionary<string, int> paths;
-	public Dictionary<AssetType, string> types;
-	Action<bool> onChangeCallback;
 }
-
-} /* namespace Finder */

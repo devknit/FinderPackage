@@ -1,128 +1,122 @@
 ﻿
 using UnityEngine;
-using UnityEditor;
-using System.Linq;
 using System.Collections.Generic;
 
-namespace Finder {
-
-public static class GUIExpansion
+namespace Finder
 {
-	public static int Toggle( bool value, GUIContent content, GUIStyle style, params GUILayoutOption[] options)
+	public static class GUIExpansion
 	{
-		Rect rect = GUILayoutUtility.GetRect( content, style, options);
-		return DoToggle( rect, GUIUtility.GetControlID( kToggleHash, FocusType.Passive, rect), value, content, style);
-	}
-	static int DoToggle( Rect rect, int id, bool value, GUIContent content, GUIStyle style)
-	{
-		return DoControl( rect, id, value, rect.Contains( Event.current.mousePosition), content, style);
-	}
-	static int DoControl( Rect rect, int id, bool on, bool hover, GUIContent content, GUIStyle style)
-	{
-		Event ev = Event.current;
-		
-		switch( ev.type)
+		public static int Toggle( bool value, GUIContent content, GUIStyle style, params GUILayoutOption[] options)
 		{
-			case EventType.Repaint:
+			Rect rect = GUILayoutUtility.GetRect( content, style, options);
+			return DoToggle( rect, GUIUtility.GetControlID( kToggleHash, FocusType.Passive, rect), value, content, style);
+		}
+		static int DoToggle( Rect rect, int id, bool value, GUIContent content, GUIStyle style)
+		{
+			return DoControl( rect, id, value, rect.Contains( Event.current.mousePosition), content, style);
+		}
+		static int DoControl( Rect rect, int id, bool on, bool hover, GUIContent content, GUIStyle style)
+		{
+			Event ev = Event.current;
+			
+			switch( ev.type)
 			{
-				if( hover != false && HasMouseControl( id) < 0)
+				case EventType.Repaint:
 				{
-					hover = false;
+					if( hover != false && HasMouseControl( id) < 0)
+					{
+						hover = false;
+					}
+					style.Draw( rect, content, hover, true, on, false);
+					break;
 				}
-				style.Draw( rect, content, hover, true, on, false);
-				break;
-			}
-			case EventType.MouseDown:
-			{
-				if( rect.Contains( ev.mousePosition) != false)
+				case EventType.MouseDown:
 				{
-					GrabMouseControl( id, ev.button);
-					ev.Use();
-				}
-				break;
-			}
-			case EventType.MouseUp:
-			{
-				int button = HasMouseControl( id);
-				if( button >= 0)
-                {
-					ReleaseMouseControl();
-					ev.Use();
-					
 					if( rect.Contains( ev.mousePosition) != false)
 					{
-						if( button == ev.button)
+						GrabMouseControl( id, ev.button);
+						ev.Use();
+					}
+					break;
+				}
+				case EventType.MouseUp:
+				{
+					int button = HasMouseControl( id);
+					if( button >= 0)
+					{
+						ReleaseMouseControl();
+						ev.Use();
+						
+						if( rect.Contains( ev.mousePosition) != false)
 						{
-							return button;
+							if( button == ev.button)
+							{
+								return button;
+							}
 						}
 					}
+					break;
 				}
-				break;
-			}
-			case EventType.MouseDrag:
-			{
-				if( HasMouseControl( id) >= 0)
+				case EventType.MouseDrag:
 				{
-					ev.Use();
+					if( HasMouseControl( id) >= 0)
+					{
+						ev.Use();
+					}
+					break;
 				}
-				break;
+			}
+			return -1;
+		}
+		internal static void GrabMouseControl( int id, int button)
+		{
+			if( s_MouseControl.ContainsKey( id) == false)
+			{
+				s_MouseControl.Add( id, button);
 			}
 		}
-		return -1;
-	}
-	internal static void GrabMouseControl( int id, int button)
-	{
-		if( mouseControl.ContainsKey( id) == false)
+		internal static int HasMouseControl( int id)
 		{
-			mouseControl.Add( id, button);
+			int button;
+			
+			if( s_MouseControl.TryGetValue( id, out button) == false)
+			{
+				button = -1;
+			}
+			return button;
 		}
-	}
-	internal static int HasMouseControl( int id)
-	{
-		int button;
-		
-		if( mouseControl.TryGetValue( id, out button) == false)
+		internal static void ReleaseMouseControl()
 		{
-			button = -1;
+			s_MouseControl.Clear();
 		}
-		return button;
-	}
-	internal static void ReleaseMouseControl()
-	{
-		mouseControl.Clear();
-	}
-	internal static void GrabKeyControl( KeyCode code, int id)
-	{
-		if( keyControl.ContainsKey( code) == false)
+		internal static void GrabKeyControl( KeyCode code, int id)
 		{
-			keyControl.Add( code, id);
+			if( s_KeyControl.ContainsKey( code) == false)
+			{
+				s_KeyControl.Add( code, id);
+			}
 		}
-	}
-	internal static bool HasKeyControl( KeyCode code)
-	{
-		return keyControl.ContainsKey( code);
-	}
-	internal static bool HasKeyControl( KeyCode code, int id)
-	{
-		int value;
-		
-		if( keyControl.TryGetValue( code, out value) != false)
+		internal static bool HasKeyControl( KeyCode code)
 		{
-			return value == id;
+			return s_KeyControl.ContainsKey( code);
 		}
-		return false;
-	}
-	internal static void ReleaseKeyControl( KeyCode code)
-	{
-		if( keyControl.ContainsKey( code) != false)
+		internal static bool HasKeyControl( KeyCode code, int id)
 		{
-			keyControl.Remove( code);
+			if( s_KeyControl.TryGetValue( code, out int value) != false)
+			{
+				return value == id;
+			}
+			return false;
 		}
+		internal static void ReleaseKeyControl( KeyCode code)
+		{
+			if( s_KeyControl.ContainsKey( code) != false)
+			{
+				s_KeyControl.Remove( code);
+			}
+		}
+		static readonly int kToggleHash = "ExToggle".GetHashCode();
+		static readonly Dictionary<int, int> s_MouseControl = new();
+		static readonly Dictionary<KeyCode, int> s_KeyControl = new();
 	}
-	static readonly int kToggleHash = "ExToggle".GetHashCode();
-	
-	static Dictionary<int, int> mouseControl = new Dictionary<int, int>();
-	static Dictionary<KeyCode, int> keyControl = new Dictionary<KeyCode, int>();
 }
-
-} /* namespace Finder */

@@ -76,7 +76,7 @@ public sealed class Search
 								{
 									founds.Add( targetPath, new ElementSource( targetPath));
 								}
-								traces[ tracePath].reference++;
+								traces[ tracePath].Reference++;
 							}
 						}
 					}
@@ -365,8 +365,8 @@ public sealed class Search
 											++tryCount;
 										}
 										while( true);
-
-										traces[ tracePath].reference++;
+										
+										traces[ tracePath].Reference++;
 									}
 								}
 							}

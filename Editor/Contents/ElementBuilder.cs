@@ -1,126 +1,120 @@
 ﻿
 using System.Linq;
-using UnityEngine;
-using UnityEditor;
-using UnityEditor.IMGUI.Controls;
 using System.Collections.Generic;
-using UnityEditorInternal;
 
-namespace Finder {
-
-public sealed class ElementBuilder
+namespace Finder
 {
-	public ElementBuilder()
+	public sealed class ElementBuilder
 	{
-		rootElements = new List<Element>();
-		registered = new SortedDictionary<string, Element>();
-	}
-	public List<Element> ToList()
-	{
-		return rootElements.ToList();
-	}
-	public bool Append( ElementSource source)
-	{
-		if( source != null && string.IsNullOrEmpty( source.path) == false)
+		public ElementBuilder()
 		{
-			string[] elementNames = source.path.Split( '/');
-			string elementName;
-			string path = string.Empty;
-			Element element = null;
-			Element parent;
-			
-			for( int i0 = 0; i0 < elementNames.Length; ++i0)
-			{
-				elementName = elementNames[ i0];
-				
-				if( string.IsNullOrEmpty( path) == false)
-				{
-					path += "/";
-				}
-				path += elementName;
-				parent = element;
-				
-				if( registered.TryGetValue( path, out element) == false)
-				{
-					if( i0 == elementNames.Length - 1)
-					{
-						element = Element.Create( source);
-					}
-					else
-					{
-						element = Element.Create( path);
-					}
-					if( element == null)
-					{
-						return false;
-					}
-					else
-					{
-						if( parent != null)
-						{
-							parent.Add( element);
-						}
-						if( i0 == 0)
-						{
-							rootElements.Add( element);
-						}
-						registered.Add( path, element);
-					}
-				}
-			}
-			return true;
+			m_RootElements = new List<Element>();
+			m_Registered = new SortedDictionary<string, Element>();
 		}
-		return false;
-	}
-	public bool Append( string assetPath, int reference=-1)
-	{
-		if( string.IsNullOrEmpty( assetPath) == false)
+		public List<Element> ToList()
 		{
-			string[] elementNames = assetPath.Split( '/');
-			string elementName;
-			string path = string.Empty;
-			Element element = null;
-			Element parent;
-			
-			for( int i0 = 0; i0 < elementNames.Length; ++i0)
-			{
-				elementName = elementNames[ i0];
-				
-				if( string.IsNullOrEmpty( path) == false)
-				{
-					path += "/";
-				}
-				path += elementName;
-				parent = element;
-				
-				if( registered.TryGetValue( path, out element) == false)
-				{
-					element = Element.Create( path, reference);
-					if( element == null)
-					{
-						return false;
-					}
-					else
-					{
-						if( parent != null)
-						{
-							parent.Add( element);
-						}
-						if( i0 == 0)
-						{
-							rootElements.Add( element);
-						}
-						registered.Add( path, element);
-					}
-				}
-			}
-			return true;
+			return m_RootElements.ToList();
 		}
-		return false;
+		public bool Append( ElementSource source)
+		{
+			if( source != null && string.IsNullOrEmpty( source.Path) == false)
+			{
+				string[] elementNames = source.Path.Split( '/');
+				string elementName;
+				string path = string.Empty;
+				Element element = null;
+				Element parent;
+				
+				for( int i0 = 0; i0 < elementNames.Length; ++i0)
+				{
+					elementName = elementNames[ i0];
+					
+					if( string.IsNullOrEmpty( path) == false)
+					{
+						path += "/";
+					}
+					path += elementName;
+					parent = element;
+					
+					if( m_Registered.TryGetValue( path, out element) == false)
+					{
+						if( i0 == elementNames.Length - 1)
+						{
+							element = Element.Create( source);
+						}
+						else
+						{
+							element = Element.Create( path);
+						}
+						if( element == null)
+						{
+							return false;
+						}
+						else
+						{
+							if( parent != null)
+							{
+								parent.Add( element);
+							}
+							if( i0 == 0)
+							{
+								m_RootElements.Add( element);
+							}
+							m_Registered.Add( path, element);
+						}
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+		public bool Append( string assetPath, int reference=-1)
+		{
+			if( string.IsNullOrEmpty( assetPath) == false)
+			{
+				string[] elementNames = assetPath.Split( '/');
+				string elementName;
+				string path = string.Empty;
+				Element element = null;
+				Element parent;
+				
+				for( int i0 = 0; i0 < elementNames.Length; ++i0)
+				{
+					elementName = elementNames[ i0];
+					
+					if( string.IsNullOrEmpty( path) == false)
+					{
+						path += "/";
+					}
+					path += elementName;
+					parent = element;
+					
+					if( m_Registered.TryGetValue( path, out element) == false)
+					{
+						element = Element.Create( path, reference);
+						if( element == null)
+						{
+							return false;
+						}
+						else
+						{
+							if( parent != null)
+							{
+								parent.Add( element);
+							}
+							if( i0 == 0)
+							{
+								m_RootElements.Add( element);
+							}
+							m_Registered.Add( path, element);
+						}
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+		readonly List<Element> m_RootElements;
+		readonly SortedDictionary<string, Element> m_Registered;
 	}
-	
-	List<Element> rootElements;
-	SortedDictionary<string, Element> registered;
 }
-
-} /* namespace Finder */
