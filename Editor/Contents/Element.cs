@@ -38,6 +38,7 @@ namespace Finder
 				element.Guid = string.Empty;
 				element.Directory = false;
 				element.Reference = component.Reference;
+				element.Missing = component.Missing;
 				element.AssetType = AssetType.kComponent;
 				element.LocalId = component.LocalId;
 				element.FindPath = component.FindPath;
@@ -47,9 +48,9 @@ namespace Finder
 				
 				return element;
 			}
-			return Create( source.Path, source.Reference);
+			return Create( source.Path, source.Reference, source.Missing);
 		}
-		public static Element Create( string path, int reference=-1)
+		public static Element Create( string path, int reference=-1, int missing=-1)
 		{
 			if( string.IsNullOrEmpty( path) == false && path.IndexOf( ":") < 0)
 			{
@@ -69,7 +70,8 @@ namespace Finder
                         Path = path,
                         Guid = guid,
                         icon = AssetDatabase.GetCachedIcon( path) as Texture2D,
-                        Directory = AssetDatabase.IsValidFolder( path)
+                        Directory = AssetDatabase.IsValidFolder( path),
+						Missing = missing
                     };
                     if( element.Directory != false)
 					{
@@ -139,6 +141,7 @@ namespace Finder
 			FindPath = src.FindPath;
 			Directory = src.Directory;
 			Reference = src.Reference;
+			Missing = src.Missing;
 			LocalId = src.LocalId;
 			ParentElement = src.ParentElement;
 			ChildElements = src.ChildElements;
@@ -161,6 +164,7 @@ namespace Finder
 			FindPath = node.FindPath;
 			Directory = node.Directory;
 			Reference = node.Reference;
+			Missing = node.Missing;
 			LocalId = node.LocalId;
 			ChildElements = srcChildElements;
 			
@@ -431,6 +435,7 @@ namespace Finder
 	#endif
 		public bool Directory{ get; private set; }
 		public int Reference{ get; private set; }
+		public int Missing{ get; private set; }
 		public long LocalId{ get; private set; }
 		public Element ParentElement{ get; internal set; }
 		public List<Element> ChildElements{ get; internal set; }
@@ -462,9 +467,12 @@ namespace Finder
 		{
 			root.Add( new SerializableElementNode( element, root.Count + 1));
 			
-			foreach( var child in element.ChildElements)
+			if( (element.ChildElements?.Count ?? 0) > 0)
 			{
-				Serialize( child);
+				foreach( var child in element.ChildElements)
+				{
+					Serialize( child);
+				}
 			}
 		}
 		Element Deserialize( int index, out int count)
@@ -515,8 +523,9 @@ namespace Finder
 			FindPath = element.FindPath;
 			Directory = element.Directory;
 			Reference = element.Reference;
+			Missing = element.Missing;
 			LocalId = element.LocalId;
-			ChildCount = element.ChildElements.Count;
+			ChildCount = element.ChildElements?.Count ?? 0;
 			IndexOfFirstChild = index;
 		}
 		[SerializeField]
@@ -541,6 +550,8 @@ namespace Finder
 		public bool Directory;
 		[SerializeField]
 		public int Reference;
+		[SerializeField]
+		public int Missing;
 		[SerializeField]
 		public long LocalId;
 		[SerializeField]

@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Finder
 {
@@ -118,7 +119,7 @@ namespace Finder
 						for( i1 = 0; i1 < assetPaths.Length; ++i1)
 						{
 							progress = i1 / (float)assetPaths.Length;
-							progress /= (float)traceGuidCount;
+							progress /= traceGuidCount;
 							progress += i0 * unitProgress;
 							targetPath = assetPaths[ i1];
 							
@@ -163,6 +164,12 @@ namespace Finder
 							}
 						}
 						traces.Add( tracePath, new ElementSource( tracePath, assetPaths.Length));
+						
+						if( CheckMissing( tracePath, traces, i0 * unitProgress) == false)
+						{
+							OnFinish();
+							return;
+						}
 					}
 				}
 				++i0;
@@ -170,231 +177,140 @@ namespace Finder
 			OnProgress( "Trace Dependents", 1);
 			OnFinish();
 		}
-	#if false
-		static void Test( string targetPath)
+		static bool CheckMissing( string tracePath, Dictionary<string, ElementSource> traces, float progress)
 		{
-			var builder = new System.Text.StringBuilder();
-			try
+			if( string.IsNullOrEmpty( tracePath) == false && AssetDatabase.IsValidFolder( tracePath) == false)
 			{
-				var assets = AssetDatabase.LoadAllAssetsAtPath( targetPath);
+				System.Type assetType = AssetDatabase.GetMainAssetTypeAtPath( tracePath);
 				
-				foreach( var asset in assets)
+				if( typeof( Material).Equals( assetType) != false
+				||	typeof( GameObject).Equals( assetType) != false
+				||	typeof( AnimationClip).Equals( assetType) != false
+				||	typeof( LightingDataAsset).Equals( assetType) != false
+				||	typeof( ScriptableObject).IsAssignableFrom( assetType) != false)
 				{
-					LogSerializedObject( asset, builder, "  ");
-				}
-			}
-			catch( System.Exception e)
-			{
-				Debug.LogError( e);
-			}
-			Debug.Log( builder.ToString());
-		}
-	#endif
-	#if false
-		static void Test( string targetPath)
-		{
-			IEnumerable<UnityEngine.Object> assets;
-			SerializedObject serializedObject;
-			SerializedProperty property;
-			
-			assets = AssetDatabase.LoadAllAssetsAtPath( targetPath);
-			
-			foreach( Object asset in assets)
-			{
-				serializedObject = new SerializedObject( asset);
-				property = serializedObject.GetIterator();
-			}
-		}
-	#endif
-		public static void CheckMissing(
-			IEnumerable<string> traceGuids,
-			out Dictionary<string, ElementSource> traces,
-			out Dictionary<string, ElementSource> founds)
-		{
-			IEnumerable<UnityEngine.Object> assets;
-			SerializedObject serializedObject;
-			SerializedProperty fileIdProperty;
-			SerializedProperty property;
-			System.Type assetType;
-			string tracePath;
-			int traceGuidCount = traceGuids.Count();
-			int traceAssetCount;
-			float unitProgress = 1.0f / (float)traceGuidCount;
-			float progress;
-			int i0 = 0, i1;
-			
-			founds = new Dictionary<string, ElementSource>();
-			traces = new Dictionary<string, ElementSource>();
-			
-			if( OnProgress( "Check Missing", 0) != false)
-			{
-				OnFinish();
-				return;
-			}
-			foreach( string traceGuid in traceGuids)
-			{
-				tracePath = AssetDatabase.GUIDToAssetPath( traceGuid);
-				
-				if( string.IsNullOrEmpty( tracePath) == false
-				&&	AssetDatabase.IsValidFolder( tracePath) == false)
-				{
-					if( traces.ContainsKey( tracePath) == false)
+					Object[] assets = AssetDatabase.LoadAllAssetsAtPath( tracePath);
+					
+					for( int i0 = 0; i0 < assets.Length; ++i0)
 					{
-						assetType = AssetDatabase.GetMainAssetTypeAtPath( tracePath);
-						if( typeof( SceneAsset).Equals( assetType) != false)
+						if( OnProgress( "Check Missing", tracePath, progress) != false)
 						{
-						//	Debug.LogWarning( string.Format( $"Unimplemented.\n{tracePath}<{assetType}>"));
+							OnFinish();
+							return false;
 						}
-						/* SceneAsset 以外をチェック */
-						else if( typeof( Material).Equals( assetType) != false
-						||		 typeof( GameObject).Equals( assetType) != false
-						||		 typeof( AnimationClip).Equals( assetType) != false
-						||		 typeof( LightingDataAsset).Equals( assetType) != false
-						||		 typeof( ScriptableObject).IsAssignableFrom( assetType) != false
-						)
+						Object asset = assets[ i0];
+						
+						if( asset == null)
 						{
-							assets = AssetDatabase.LoadAllAssetsAtPath( tracePath);
-							traces.Add( tracePath, new ElementSource( tracePath, 0));
-							
-							traceAssetCount = assets.Count();
-							i1 = 0;
-							
-							foreach( Object asset in assets)
+							continue;
+						}
+						var serializedObject = new SerializedObject( asset);
+						SerializedProperty property = serializedObject.GetIterator();
+						
+						var displayDirectory = new Stack<string>();
+						string currentDisplayName = string.Empty;
+						
+						while( property.Next( true) != false)
+						{
+							if( property.propertyPath.EndsWith( ".Array") == false
+							&&	property.propertyPath.EndsWith( ".Array.size") == false)
 							{
-								progress = i1 / (float)traceAssetCount;
-								progress /= (float)traceGuidCount;
-								progress += i0 * unitProgress;
-								
-								if( OnProgress( "Check Missing", tracePath, progress) != false)
+								if( displayDirectory.Count < property.depth)
 								{
-									OnFinish();
-									return;
+									displayDirectory.Push( currentDisplayName);
+									currentDisplayName = property.displayName;
 								}
-								if( asset == null)
+								else if( displayDirectory.Count > property.depth)
 								{
-									continue;
-								}
-								serializedObject = new SerializedObject( asset);
-								property = serializedObject.GetIterator();
-								
-								while( property.Next( true))
-								{
-									if( property.propertyType == SerializedPropertyType.ObjectReference
-									&&	property.objectReferenceValue == null)
+									while( displayDirectory.Count > property.depth)
 									{
-										bool bMissing = false;
+										displayDirectory.Pop();
+										currentDisplayName = property.displayName;
+									}
+								}
+								else
+								{
+									currentDisplayName = property.displayName;
+								}
+							}
+							if( property.propertyType == SerializedPropertyType.ObjectReference && property.objectReferenceValue == null)
+							{
+								bool bMissing = false;
+								
+								if( property.objectReferenceInstanceIDValue != 0)
+								{
+									bMissing = true;
+								}
+								else
+								{
+									if( property.hasChildren != false)
+									{
+										SerializedProperty fileIdProperty = property.FindPropertyRelative( "m_FileID");
 										
-										if( property.objectReferenceInstanceIDValue != 0)
+										if( fileIdProperty != null && fileIdProperty.intValue != 0)
 										{
 											bMissing = true;
 										}
-										else
-										{
-											if( property.hasChildren != false)
-											{
-												fileIdProperty = property.FindPropertyRelative( "m_FileID");
-												if( fileIdProperty != null && fileIdProperty.intValue != 0)
-												{
-													bMissing = true;
-												}
-											}
-										}
-										if( bMissing != false)
-										{
-											SerializedProperty gameObjectProperty;
-											GameObject gameObject = null;
-											string hierarchyPath = string.Empty;
-											string componentPath;
-											string foundKeyPath;
-											string assetGuid = string.Empty;
-											long assetLocalId = 0;
-											int intstanceId = 0;
-											int tryCount = 0;
-											
-											if( asset is Component component)
-											{
-												var transform = component.transform as Transform;
-												
-												if( transform != null)
-												{
-													intstanceId = transform.GetInstanceID();
-												}
-												while( transform != null)
-												{
-													hierarchyPath = (hierarchyPath.Length == 0)? 
-														transform.name : (transform.name + "/" + hierarchyPath);
-													transform = transform.parent;
-												}
-											}
-											componentPath = string.Format( 
-												$"{tracePath}/{hierarchyPath.Replace( "/" , "|")}:{property.propertyPath.Replace( "/" , "#")}");
-											
-											if( property.type == "UnityEngine.GameObject")
-											{
-												gameObjectProperty = property;
-											}
-											else
-											{
-												gameObjectProperty = serializedObject.FindProperty( "m_GameObject");
-											}
-											if( gameObjectProperty != null)
-											{
-												gameObject = gameObjectProperty.objectReferenceValue as GameObject;
-												if( gameObject != null)
-												{
-													AssetDatabase.TryGetGUIDAndLocalFileIdentifier( 
-														gameObject.transform, out assetGuid, out assetLocalId);
-												}
-											}
-											do
-											{
-												foundKeyPath = string.Format( $"{componentPath}<{assetLocalId}>#{tryCount}");
-													
-												if( founds.ContainsKey( foundKeyPath) == false)
-												{
-													string name = string.Format( $"{hierarchyPath}<{asset.GetType()}> ${property.propertyPath}");
-													founds.Add( foundKeyPath, new ElementComponentSource( 
-														name, asset.GetType(), hierarchyPath, assetLocalId, foundKeyPath, 0));
-													break;
-												}
-												++tryCount;
-											}
-											while( true);
-											
-											traces[ tracePath].Reference++;
-										}
 									}
 								}
-								++i1;
+								if( bMissing != false)
+								{
+									string hierarchyPath = string.Empty;
+									long assetLocalId = 0;
+									int intstanceId = 0;
+									int tryCount = 0;
+									
+									if( asset is Component component)
+									{
+										var transform = component.transform as Transform;
+										
+										if( transform != null)
+										{
+											intstanceId = transform.GetInstanceID();
+										}
+										while( transform != null)
+										{
+											hierarchyPath = (hierarchyPath.Length == 0)? 
+												transform.name : (transform.name + "/" + hierarchyPath);
+											transform = transform.parent;
+										}
+									}
+									string componentPath = string.Format( 
+										$"{tracePath}/{asset.GetType()} {property.propertyPath.Replace( "/" , "#")}");
+									SerializedProperty gameObjectProperty = (property.type == "UnityEngine.GameObject")? 
+										property : serializedObject.FindProperty( "m_GameObject");
+									
+									if( gameObjectProperty?.objectReferenceValue is GameObject gameObject)
+									{
+										AssetDatabase.TryGetGUIDAndLocalFileIdentifier( 
+											gameObject.transform, out string assetGuid, out assetLocalId);
+									}
+									do
+									{
+										string foundKeyPath = string.Format( $"{componentPath}<{assetLocalId}>#{tryCount}");
+											
+										if( traces.ContainsKey( foundKeyPath) == false)
+										{
+											string displayPath = string.Join( '/', displayDirectory.Reverse());
+											displayPath = Path.Combine( displayPath, currentDisplayName).Replace( @"\", "/");
+											string name = string.Format( $"<{asset.GetType().Name}> {displayPath}");
+											traces.Add( foundKeyPath, new ElementComponentSource( 
+												name, asset.GetType(), hierarchyPath, assetLocalId, foundKeyPath, -1));
+											break;
+										}
+										++tryCount;
+									}
+									while( true);
+									
+									traces[ tracePath].Missing++;
+								}
 							}
-						}
-						else
-						{
-						//	Debug.LogWarning( string.Format( $"Treated as exempt.\n{tracePath}<{assetType}>"));
 						}
 					}
 				}
-				++i0;
 			}
-			OnProgress( "Check Missing", 1);
-			OnFinish();
+			return true;
 		}
-	#if false
-		static GetProperty( Object targetAsset, string propertyName)
-		{
-			var serializedObject = new SerializedObject( targetAsset);
-			SerializedProperty property = serializedObject.GetIterator();
-			
-			while( property.Next( true))
-			{
-				if( property.name == propertyName)
-				{
-					break;
-				}
-			}
-			
-		}
-	#endif
 		static bool OnProgress( string caption, float progress)
 		{
 			return EditorUtility.DisplayCancelableProgressBar( caption, string.Empty, progress);

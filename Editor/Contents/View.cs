@@ -33,6 +33,7 @@ namespace Finder
 			kPath = 0x04,
 			kGuid = 0x08,
 			kReference = 0x10,
+			kMissing = 0x20,
 			kDefault = kName | kExtension,
 			kAll = kName | kExtension | kPath | kGuid | kReference
 		}
@@ -83,6 +84,16 @@ namespace Finder
 				new MultiColumnHeaderState.Column
 				{
 					headerContent			= new GUIContent( "Reference"),
+					headerTextAlignment 	= TextAlignment.Center,
+					canSort 				= false,
+					width					= 80, 
+					minWidth				= 50,
+					autoResize				= false,
+					allowToggleVisibility	= true
+				},
+				new MultiColumnHeaderState.Column
+				{
+					headerContent			= new GUIContent( "Missing"),
 					headerTextAlignment 	= TextAlignment.Center,
 					canSort 				= false,
 					width					= 80, 
@@ -401,6 +412,14 @@ namespace Finder
 							if( element.Reference >= 0)
 							{
 								DefaultGUI.LabelRightAligned( cellRect, element.Reference.ToString(), args.selected, args.focused);
+							}
+							break;
+						}
+						case Column.kMissing:
+						{
+							if( element.Missing >= 0)
+							{
+								DefaultGUI.LabelRightAligned( cellRect, element.Missing.ToString(), args.selected, args.focused);
 							}
 							break;
 						}

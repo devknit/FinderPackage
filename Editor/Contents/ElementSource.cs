@@ -17,8 +17,14 @@ namespace Finder
 			get{ return m_Reference; }
 			internal set{ m_Reference = value; }
 		}
+		public int Missing
+		{
+			get{ return m_Missing; }
+			internal set{ m_Missing = value; }
+		}
 		readonly string m_Path;
 		int m_Reference;
+		int m_Missing;
 	}
 	public sealed class ElementComponentSource : ElementSource
 	{

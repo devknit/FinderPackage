@@ -11,7 +11,6 @@ namespace Finder
 		kNone,
 		kTraceDependents,
 		kTracePrecedents,
-		kCheckMissing,
 	}
 	[System.Serializable]
 	public sealed class Contents
@@ -117,7 +116,7 @@ namespace Finder
 			
 			if( m_Target == null)
 			{
-				m_Target = new Explorer( new List<Element>(), View.Column.kName | View.Column.kReference);
+				m_Target = new Explorer( new List<Element>(), View.Column.kName | View.Column.kReference | View.Column.kMissing);
 				m_Target.OnEnable( m_ClickType);
 				m_Target.ColumnHeaderResizeToFit();
 			}
@@ -163,6 +162,7 @@ namespace Finder
 			{
 				contents.SearchAssets( assetGuids, newSearchType);
 			}
+			
 		}
 		public void SearchAssets( IEnumerable<string> assetGuids, SearchType newSearchType)
 		{
@@ -180,11 +180,6 @@ namespace Finder
 				case SearchType.kTraceDependents:
 				{
 					Search.TraceDependents( assetGuids, m_Recursive, out targets, out searches);
-					break;
-				}
-				case SearchType.kCheckMissing:
-				{
-					Search.CheckMissing( assetGuids, out targets, out searches);
 					break;
 				}
 				default:
@@ -213,7 +208,7 @@ namespace Finder
 			}
 			if( m_Target == null)
 			{
-				m_Target = new Explorer( new List<Element>(), View.Column.kName | View.Column.kReference);
+				m_Target = new Explorer( new List<Element>(), View.Column.kName | View.Column.kReference | View.Column.kMissing);
 				m_Target.OnEnable( m_ClickType);
 				m_Target.ColumnHeaderResizeToFit();
 			}
@@ -240,7 +235,7 @@ namespace Finder
 		};
 		static readonly string[] kSearchTypes = new []
 		{
-			"", "To Dependencies", "From Dependencies", "Check Missing"
+			"", "To Dependencies", "From Dependencies"
 		};
 		[SerializeField]
 		Explorer m_Project;

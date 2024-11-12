@@ -343,11 +343,6 @@ namespace Finder
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
 							contents?.SearchAssets( elements, SearchType.kTracePrecedents);
 						});
-						contextMenu.AddItem( new GUIContent( "Select Check Missing"), false, () =>
-						{
-							var elements = m_View.SelectSelectedElements( x => x.Guid);
-							contents?.SearchAssets( elements, SearchType.kCheckMissing);
-						});
 					#if false
 						if( m_View.ContainsSeelctedElements( AssetType.kMaterial, x => x.AssetType) != false)
 						{

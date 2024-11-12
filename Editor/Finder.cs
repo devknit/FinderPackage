@@ -56,13 +56,6 @@ namespace Finder
 			window.Show();
 			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.kTracePrecedents);
 		}
-		[MenuItem("Assets/Finder/Select Check Missing", false, priority = 24)]
-		static void CheckMissing()
-		{
-			var window = CreateNewWindow<Finder>( null);
-			window.Show();
-			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.kCheckMissing);
-		}
 		public void AddItemsToMenu( GenericMenu menu)
 		{
 			menu.AddItem
