@@ -1,4 +1,4 @@
-﻿
+﻿#if false
 using System.Linq;
 using UnityEngine;
 using UnityEditor;
@@ -152,3 +152,4 @@ internal sealed class MaterialCleaner
 	const string kProgressCaptionName = "Material Cleaner";
 	const string kMenuItemName = "Assets/Material Cleaner";
 }
+#endif

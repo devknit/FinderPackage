@@ -27,43 +27,42 @@ namespace Finder
 				s_ActiveWindows = null;
 			}
 		}
-		[MenuItem( "Assets/Assets/Finder/Open &f")]
+		[MenuItem( "Assets/Finder/Open &f", priority = 21)]
 		static void OpenFinder()
 		{
 			CreateNewWindow<Finder>( null).Show();
 		}
-		[MenuItem("Assets/Assets/Finder/Check Missing", false)]
-		static void CheckMissing()
+		[MenuItem("Assets/Finder/Trace Dependents", true, priority = 22)]
+		static bool IsTraceDependents()
 		{
-			var window = CreateNewWindow<Finder>( null);
-			window.Show();
-			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.kCheckMissing);
+			return Selection.assetGUIDs?.Length > 0;
 		}
-		[MenuItem("Assets/Assets/Finder/Trace Precedents", false)]
-		static void TracePrecedents()
-		{
-			var window = CreateNewWindow<Finder>( null);
-			window.Show();
-			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.kTracePrecedents);
-		}
-		[MenuItem("Assets/Assets/Finder/Trace Dependents", false)]
+		[MenuItem("Assets/Finder/Trace Dependents", false, priority = 22)]
 		static void TraceDependents()
 		{
 			var window = CreateNewWindow<Finder>( null);
 			window.Show();
 			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.kTraceDependents);
 		}
-		[MenuItem("Assets/Assets/Finder/Trace Precedents", true)]
+		[MenuItem("Assets/Finder/Trace Precedents", true, priority = 23)]
 		static bool IsTracePrecedents()
 		{
 			return Selection.assetGUIDs?.Length > 0;
 		}
-		[MenuItem("Assets/Assets/Finder/Trace Dependents", true)]
-		static bool IsTraceDependents()
+		[MenuItem("Assets/Finder/Trace Precedents", false, priority = 23)]
+		static void TracePrecedents()
 		{
-			return Selection.assetGUIDs?.Length > 0;
+			var window = CreateNewWindow<Finder>( null);
+			window.Show();
+			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.kTracePrecedents);
 		}
-		
+		[MenuItem("Assets/Finder/Check Missing", false, priority = 24)]
+		static void CheckMissing()
+		{
+			var window = CreateNewWindow<Finder>( null);
+			window.Show();
+			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.kCheckMissing);
+		}
 		public void AddItemsToMenu( GenericMenu menu)
 		{
 			menu.AddItem

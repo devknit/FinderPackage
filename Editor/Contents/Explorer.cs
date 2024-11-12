@@ -348,6 +348,7 @@ namespace Finder
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
 							contents?.OpenSearchAssets( elements, SearchType.kTraceDependents);
 						});
+					#if false
 						if( m_View.ContainsSeelctedElements( AssetType.kMaterial, x => x.AssetType) != false)
 						{
 							contextMenu.AddItem( new GUIContent( "Material Cleaner"), false, () =>
@@ -356,6 +357,7 @@ namespace Finder
 								MaterialCleaner.Clean( elements);
 							});
 						}
+					#endif
 						contextMenu.ShowAsContext();
 						ev.Use();
 					}

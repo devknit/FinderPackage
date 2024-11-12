@@ -502,9 +502,7 @@ namespace Finder
 			{
 				if( element.ValidCount > 0)
 				{
-					var item = new Element( element);
-					
-					rows.Add( item);
+					rows.Add( new Element( element));
 					
 					if( element.ChildElements.Count > 0)
 					{
@@ -523,8 +521,10 @@ namespace Finder
 				{
 					if( m_SearchFilter.Check( element) != false)
 					{
-						var item = new Element( element);
-						item.depth = 0;
+						var item = new Element( element)
+						{
+							depth = 0
+						};
 						rows.Add( item);
 					}
 				}

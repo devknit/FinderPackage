@@ -53,25 +53,34 @@ namespace Finder
 		{
 			if( string.IsNullOrEmpty( path) == false && path.IndexOf( ":") < 0)
 			{
-				string guid = AssetDatabase.AssetPathToGUID( path);
+				string guid = path switch
+				{
+					"Library" => "Library",
+					"Packages" => "Packages",
+					"ProjectSettings" => "ProjectSettings",
+					_ => AssetDatabase.AssetPathToGUID( path)
+				};
 				if( string.IsNullOrEmpty( guid) == false)
 				{
-					var element = new Element();
-					element.id = path.GetHashCode();
-					element.name = System.IO.Path.GetFileNameWithoutExtension( path);
-					element.Extension = System.IO.Path.GetExtension( path);
-					element.Path = path;
-					element.Guid = guid;
-					element.icon = AssetDatabase.GetCachedIcon( path) as Texture2D;
-					element.Directory = AssetDatabase.IsValidFolder( path);
-					
-					if( element.Directory != false)
+                    var element = new Element
+                    {
+                        id = path.GetHashCode(),
+                        Extension = System.IO.Path.GetExtension( path),
+                        Path = path,
+                        Guid = guid,
+                        icon = AssetDatabase.GetCachedIcon( path) as Texture2D,
+                        Directory = AssetDatabase.IsValidFolder( path)
+                    };
+                    if( element.Directory != false)
 					{
+						element.name = System.IO.Path.GetFileName( path);
 						element.AssetType = AssetType.kDirectory;
 						element.Reference = -1;
 					}
 					else
 					{
+						element.name = System.IO.Path.GetFileNameWithoutExtension( path);
+						
 						if( AssetTypes.kExtensions.TryGetValue( element.Extension, out AssetType assetType) != false)
 						{
 							element.AssetType = assetType;

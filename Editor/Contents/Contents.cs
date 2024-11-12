@@ -20,32 +20,6 @@ namespace Finder
 		{
 			m_ChangeProject = true;
 			m_OnCreateWindowContens = onCreateWindowContens;
-			
-			if( m_Project == null)
-			{
-				m_Project = new Explorer( GetAllAssetElements(), View.Column.kName);
-			}
-			m_Project.OnEnable( m_ClickType);
-			
-			if( m_Target == null)
-			{
-				m_Target = new Explorer( new List<Element>(), View.Column.kName | View.Column.kReference);
-			}
-			m_Target.OnEnable( m_ClickType);
-			
-			if( m_Search == null)
-			{
-				m_Search = new Explorer( new List<Element>(), View.Column.kDefault);
-			}
-			m_Search.OnEnable( m_ClickType);
-			
-			if( m_Initialized == false)
-			{
-				m_Project.ColumnHeaderResizeToFit();
-				m_Target.ColumnHeaderResizeToFit();
-				m_Search.ColumnHeaderResizeToFit();
-				m_Initialized = true;
-			}
 		}
 		public void OnDisable()
 		{
@@ -64,11 +38,17 @@ namespace Finder
 		}
 		public void OnToolbarGUI()
 		{
-			var newClickType = (ClickType)EditorGUILayout.Popup( (int)m_ClickType, kClickTypes, EditorStyles.toolbarPopup, GUILayout.Width( 100));
+			var newClickType = (ClickType)EditorGUILayout.Popup( (int)m_ClickType, kClickTypes, EditorStyles.toolbarPopup, GUILayout.Width( 120));
 			if( m_ClickType != newClickType)
 			{
-				m_Project.SetClickType( newClickType);
-				m_Target.SetClickType( newClickType);
+				if( m_Project != null)
+				{
+					m_Project.SetClickType( newClickType);
+				}
+				if( m_Target != null)
+				{
+					m_Target.SetClickType( newClickType);
+				}
 				m_Search.SetClickType( newClickType);
 				m_ClickType = newClickType;
 			}
@@ -79,21 +59,41 @@ namespace Finder
 		}
 		public void OnProjectGUI()
 		{
-			if( m_ChangeProject != false)
+			if( m_Project == null)
+			{
+				m_Project = new Explorer( GetAllAssetElements(), View.Column.kName);
+				m_Project.OnEnable( m_ClickType);
+				m_Project.ColumnHeaderResizeToFit();
+			}
+			else if( m_ChangeProject != false)
 			{
 				m_Project.Apply( GetAllAssetElements());
-				m_ChangeProject = false;
 			}
+			m_ChangeProject = false;
 			m_Project.OnGUI( this);
 		}
 		public void OnTargetGUI()
 		{
 			OnSearchToolbarGUI();
+			
+			if( m_Target == null)
+			{
+				m_Target = new Explorer( new List<Element>(), View.Column.kName | View.Column.kReference);
+				m_Target.OnEnable( m_ClickType);
+				m_Target.ColumnHeaderResizeToFit();
+			}
 			m_Target.OnGUI( this);
 		}
 		public void OnSearchGUI()
 		{
 			OnSearchToolbarGUI();
+			
+			if( m_Search == null)
+			{
+				m_Search = new Explorer( new List<Element>(), View.Column.kDefault);
+				m_Search.OnEnable( m_ClickType);
+				m_Search.ColumnHeaderResizeToFit();
+			}
 			m_Search.OnGUI( this);
 		}
 		public void OnSearchToolbarGUI()
@@ -140,6 +140,7 @@ namespace Finder
 		}
 		List<Element> GetAllAssetElements()
 		{
+			EditorUtility.DisplayProgressBar( "Enumerating Assets", "", 0);
 			var paths = AssetDatabase.GetAllAssetPaths();
 			var builder = new ElementBuilder();
 			
@@ -147,9 +148,12 @@ namespace Finder
 			{
 				for( int i0 = 0; i0 < paths.Length; ++i0)
 				{
+					EditorUtility.DisplayProgressBar( "Enumerating Assets", paths[ i0], i0 / (float)paths.Length);
 					builder.Append( paths[ i0]);
 				}
 			}
+			EditorUtility.DisplayProgressBar( "Enumerating Assets", "Done", 1);
+			EditorUtility.ClearProgressBar();
 			return builder.ToList();
 		}
 		public void OpenSearchAssets( IEnumerable<string> assetGuids, SearchType newSearchType)
@@ -242,8 +246,6 @@ namespace Finder
 		string[] m_TargetGuids;
 		[SerializeField]
 		ClickType m_ClickType = ClickType.kActiveFileOnly;
-		[SerializeField]
-		bool m_Initialized;
 		
 		System.Func<Contents> m_OnCreateWindowContens;
 	}
