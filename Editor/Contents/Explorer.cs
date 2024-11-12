@@ -323,30 +323,30 @@ namespace Finder
 								element?.ActiveObject( true);
 							});
 						}
-						contextMenu.AddItem( new GUIContent( "Search/Check Missing"), false, () =>
+						contextMenu.AddItem( new GUIContent( "Select To Dependencies/New Window"), false, () =>
 						{
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
-							contents?.SearchAssets( elements, SearchType.kCheckMissing);
+							contents?.OpenSearchAssets( elements, SearchType.kTraceDependents);
 						});
-						contextMenu.AddItem( new GUIContent( "Search/Trace Precedents"), false, () =>
-						{
-							var elements = m_View.SelectSelectedElements( x => x.Guid);
-							contents?.SearchAssets( elements, SearchType.kTracePrecedents);
-						});
-						contextMenu.AddItem( new GUIContent( "Search/Trace Dependents"), false, () =>
+						contextMenu.AddItem( new GUIContent( "Select To Dependencies/Current Window"), false, () =>
 						{
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
 							contents?.SearchAssets( elements, SearchType.kTraceDependents);
 						});
-						contextMenu.AddItem( new GUIContent( "Search/Trace Precedents new tab"), false, () =>
+						contextMenu.AddItem( new GUIContent( "Select From Dependencies/New Window"), false, () =>
 						{
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
 							contents?.OpenSearchAssets( elements, SearchType.kTracePrecedents);
 						});
-						contextMenu.AddItem( new GUIContent( "Search/Trace Dependents new tab"), false, () =>
+						contextMenu.AddItem( new GUIContent( "Select From Dependencies/Current Window"), false, () =>
 						{
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
-							contents?.OpenSearchAssets( elements, SearchType.kTraceDependents);
+							contents?.SearchAssets( elements, SearchType.kTracePrecedents);
+						});
+						contextMenu.AddItem( new GUIContent( "Select Check Missing"), false, () =>
+						{
+							var elements = m_View.SelectSelectedElements( x => x.Guid);
+							contents?.SearchAssets( elements, SearchType.kCheckMissing);
 						});
 					#if false
 						if( m_View.ContainsSeelctedElements( AssetType.kMaterial, x => x.AssetType) != false)
@@ -458,7 +458,6 @@ namespace Finder
 		// View.Type m_ViewType;
 		[SerializeField]
 		string m_SearchString;
-		
 		[System.NonSerialized]
 		List<Element> m_Elements;
 		[System.NonSerialized]

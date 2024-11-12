@@ -9,9 +9,9 @@ namespace Finder
 	public enum SearchType
 	{
 		kNone,
-		kCheckMissing,
+		kTraceDependents,
 		kTracePrecedents,
-		kTraceDependents
+		kCheckMissing,
 	}
 	[System.Serializable]
 	public sealed class Contents
@@ -20,6 +20,22 @@ namespace Finder
 		{
 			m_ChangeProject = true;
 			m_OnCreateWindowContens = onCreateWindowContens;
+			
+			if( m_Project != null)
+			{
+				m_Project.OnEnable( m_ClickType);
+				m_Project.ColumnHeaderResizeToFit();
+			}
+			if( m_Target != null)
+			{
+				m_Target.OnEnable( m_ClickType);
+				m_Target.ColumnHeaderResizeToFit();
+			}
+			if( m_Search != null)
+			{
+				m_Search.OnEnable( m_ClickType);
+				m_Search.ColumnHeaderResizeToFit();
+			}
 		}
 		public void OnDisable()
 		{
@@ -49,8 +65,31 @@ namespace Finder
 				{
 					m_Target.SetClickType( newClickType);
 				}
-				m_Search.SetClickType( newClickType);
+				if( m_Search != null)
+				{
+					m_Search.SetClickType( newClickType);
+				}
 				m_ClickType = newClickType;
+			}
+			if( m_SearchType != SearchType.kNone)
+			{
+				using( new EditorGUILayout.HorizontalScope( EditorStyles.toolbar))
+				{
+					var newSearchType = (SearchType)EditorGUILayout.Popup( (int)m_SearchType, kSearchTypes, EditorStyles.toolbarPopup, GUILayout.Width( 140));
+					if( m_SearchType != newSearchType)
+					{
+						m_SearchType = newSearchType;
+						ResearchAssets();
+					}
+					bool newRecursive = EditorGUILayout.ToggleLeft( "Recursive", m_Recursive, GUILayout.Width( 80));
+					
+					if( m_Recursive != newRecursive)
+					{
+						m_Recursive = newRecursive;
+						ResearchAssets();
+					}
+					GUILayout.FlexibleSpace();
+				}
 			}
 		}
 		public void OnProjectChange()
@@ -98,45 +137,6 @@ namespace Finder
 		}
 		public void OnSearchToolbarGUI()
 		{
-			switch( m_SearchType)
-			{
-				case SearchType.kTracePrecedents:
-				case SearchType.kTraceDependents:
-				{
-					using( new EditorGUILayout.HorizontalScope( EditorStyles.toolbar))
-					{
-						var toolbarButtonOn = new GUIStyle( EditorStyles.toolbarButton);
-						toolbarButtonOn.normal = toolbarButtonOn.active;
-						toolbarButtonOn.onNormal = toolbarButtonOn.onActive;
-						
-						if( GUILayout.Button( kSearchTypes[ 0], (
-							m_SearchType == SearchType.kTracePrecedents)?
-							toolbarButtonOn : EditorStyles.toolbarButton,
-							GUILayout.ExpandWidth( false)) != false)
-						{
-							m_SearchType = SearchType.kTracePrecedents;
-							ResearchAssets();
-						}
-						if( GUILayout.Button( kSearchTypes[ 1], (
-							m_SearchType == SearchType.kTraceDependents)?
-							toolbarButtonOn : EditorStyles.toolbarButton,
-							GUILayout.ExpandWidth( false)) != false)
-						{
-							m_SearchType = SearchType.kTraceDependents;
-							ResearchAssets();
-						}
-						bool newRecursive = EditorGUILayout.ToggleLeft( "Recursive", m_Recursive, GUILayout.Width( 80));
-						
-						if( m_Recursive != newRecursive)
-						{
-							m_Recursive = newRecursive;
-							ResearchAssets();
-						}
-						GUILayout.FlexibleSpace();
-					}
-					break;
-				}
-			}
 		}
 		List<Element> GetAllAssetElements()
 		{
@@ -197,6 +197,12 @@ namespace Finder
 			{
 				builder.Append( found.Value);
 			}
+			if( m_Search == null)
+			{
+				m_Search = new Explorer( new List<Element>(), View.Column.kDefault);
+				m_Search.OnEnable( m_ClickType);
+				m_Search.ColumnHeaderResizeToFit();
+			}
 			m_Search.Apply( builder.ToList());
 			m_Search.ExpandAll();
 			
@@ -204,6 +210,12 @@ namespace Finder
 			foreach( var trace in targets)
 			{
 				builder.Append( trace.Value);
+			}
+			if( m_Target == null)
+			{
+				m_Target = new Explorer( new List<Element>(), View.Column.kName | View.Column.kReference);
+				m_Target.OnEnable( m_ClickType);
+				m_Target.ColumnHeaderResizeToFit();
 			}
 			m_Target.Apply( builder.ToList());
 			m_Target.ExpandAll();
@@ -228,7 +240,7 @@ namespace Finder
 		};
 		static readonly string[] kSearchTypes = new []
 		{
-			"Precedents", "Dependents"
+			"", "To Dependencies", "From Dependencies", "Check Missing"
 		};
 		[SerializeField]
 		Explorer m_Project;

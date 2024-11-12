@@ -32,31 +32,31 @@ namespace Finder
 		{
 			CreateNewWindow<Finder>( null).Show();
 		}
-		[MenuItem("Assets/Finder/Trace Dependents", true, priority = 22)]
+		[MenuItem("Assets/Finder/Select To Dependencies", true, priority = 22)]
 		static bool IsTraceDependents()
 		{
 			return Selection.assetGUIDs?.Length > 0;
 		}
-		[MenuItem("Assets/Finder/Trace Dependents", false, priority = 22)]
+		[MenuItem("Assets/Finder/Select To Dependencies", false, priority = 22)]
 		static void TraceDependents()
 		{
 			var window = CreateNewWindow<Finder>( null);
 			window.Show();
 			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.kTraceDependents);
 		}
-		[MenuItem("Assets/Finder/Trace Precedents", true, priority = 23)]
+		[MenuItem("Assets/Finder/Select From Dependencies", true, priority = 23)]
 		static bool IsTracePrecedents()
 		{
 			return Selection.assetGUIDs?.Length > 0;
 		}
-		[MenuItem("Assets/Finder/Trace Precedents", false, priority = 23)]
+		[MenuItem("Assets/Finder/Select From Dependencies", false, priority = 23)]
 		static void TracePrecedents()
 		{
 			var window = CreateNewWindow<Finder>( null);
 			window.Show();
 			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.kTracePrecedents);
 		}
-		[MenuItem("Assets/Finder/Check Missing", false, priority = 24)]
+		[MenuItem("Assets/Finder/Select Check Missing", false, priority = 24)]
 		static void CheckMissing()
 		{
 			var window = CreateNewWindow<Finder>( null);
