@@ -35,7 +35,7 @@ namespace Finder
 				element.name = component.Name;
 				element.Extension = string.Empty;
 				element.Path = component.Path;
-				element.Guid = string.Empty;
+				element.Guid = component.LocalId.ToString();
 				element.Directory = false;
 				element.Reference = component.Reference;
 				element.Missing = component.Missing;

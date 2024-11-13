@@ -32,10 +32,10 @@ namespace Finder
 			kExtension = 0x02,
 			kPath = 0x04,
 			kGuid = 0x08,
-			kReference = 0x10,
-			kMissing = 0x20,
+			kMissing = 0x10,
+			kReference = 0x20,
 			kDefault = kName | kExtension,
-			kAll = kName | kExtension | kPath | kGuid | kReference
+			kAll = kName | kExtension | kPath | kGuid | kMissing | kReference
 		}
 		public static MultiColumnHeaderState CreateHeaderState( Column columnMask=Column.kNone)
 		{
@@ -76,7 +76,17 @@ namespace Finder
 					headerContent			= new GUIContent( "Guid"),
 					headerTextAlignment 	= TextAlignment.Center,
 					canSort 				= false,
-					width					= 200, 
+					width					= 240, 
+					minWidth				= 50,
+					autoResize				= false,
+					allowToggleVisibility	= true
+				},
+				new MultiColumnHeaderState.Column
+				{
+					headerContent			= new GUIContent( "Missing"),
+					headerTextAlignment 	= TextAlignment.Center,
+					canSort 				= false,
+					width					= 80, 
 					minWidth				= 50,
 					autoResize				= false,
 					allowToggleVisibility	= true
@@ -91,16 +101,6 @@ namespace Finder
 					autoResize				= false,
 					allowToggleVisibility	= true
 				},
-				new MultiColumnHeaderState.Column
-				{
-					headerContent			= new GUIContent( "Missing"),
-					headerTextAlignment 	= TextAlignment.Center,
-					canSort 				= false,
-					width					= 80, 
-					minWidth				= 50,
-					autoResize				= false,
-					allowToggleVisibility	= true
-				}
 			};
 			var headerState = new MultiColumnHeaderState( columns);
 			
@@ -385,6 +385,11 @@ namespace Finder
 					
 					CenterRectUsingSingleLineHeight( ref cellRect);
 					
+					if( element.Missing == -2 && Event.current.type == EventType.Repaint)
+					{
+						DefaultStyles.label.Draw( args.rowRect, 
+							EditorGUIUtility.IconContent( "Warning"), isHover: false, isActive: false, args.selected, args.focused);
+					}
 					switch( (Column)(1 << columnIndex))
 					{
 						case Column.kName:
@@ -407,19 +412,19 @@ namespace Finder
 							DefaultGUI.Label( cellRect, element.Guid, args.selected, args.focused);
 							break;
 						}
-						case Column.kReference:
-						{
-							if( element.Reference >= 0)
-							{
-								DefaultGUI.LabelRightAligned( cellRect, element.Reference.ToString(), args.selected, args.focused);
-							}
-							break;
-						}
 						case Column.kMissing:
 						{
 							if( element.Missing >= 0)
 							{
 								DefaultGUI.LabelRightAligned( cellRect, element.Missing.ToString(), args.selected, args.focused);
+							}
+							break;
+						}
+						case Column.kReference:
+						{
+							if( element.Reference >= 0)
+							{
+								DefaultGUI.LabelRightAligned( cellRect, element.Reference.ToString(), args.selected, args.focused);
 							}
 							break;
 						}

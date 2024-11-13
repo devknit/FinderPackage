@@ -2,8 +2,8 @@
 using System.Linq;
 using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Finder
 {
@@ -35,7 +35,13 @@ namespace Finder
 				&&	AssetDatabase.IsValidFolder( tracePath) == false)
 				{
 					traceAssets.Add( tracePath, traceGuid);
-					traces.Add( tracePath, new ElementSource( tracePath, 0));
+					traces.Add( tracePath, new ElementSource( tracePath, 0, -1));
+					
+					if( CheckMissing( tracePath, traces, 0) == false)
+					{
+						OnFinish();
+						return;
+					}
 				}
 			}
 			if( traceAssets.Count > 0)
@@ -51,7 +57,7 @@ namespace Finder
 					
 					if( i0 % 3 == 2)
 					{
-						if( OnProgress( "Trace Precedents", targetPath, (float)i0 / (float)targetGuids.Length) != false)
+						if( OnProgress( "Trace Precedents", targetPath, i0 / (float)targetGuids.Length) != false)
 						{
 							OnFinish();
 							return;
@@ -71,7 +77,7 @@ namespace Finder
 								{
 									if( founds.ContainsKey( targetPath) == false)
 									{
-										founds.Add( targetPath, new ElementSource( targetPath));
+										founds.Add( targetPath, new ElementSource( targetPath, -1, -1));
 									}
 									traces[ tracePath].Reference++;
 								}
@@ -89,7 +95,7 @@ namespace Finder
 			out Dictionary<string, ElementSource> founds)
 		{
 			int traceGuidCount = traceGuids.Count();
-			float unitProgress = 1.0f / (float)traceGuidCount;
+			float unitProgress = 1.0f / traceGuidCount;
 			float progress;
 			string[] assetPaths;
 			string targetPath;
@@ -115,6 +121,7 @@ namespace Finder
 					if( traces.ContainsKey( tracePath) == false)
 					{
 						assetPaths = AssetDatabase.GetDependencies( tracePath, recursive);
+						traces.Add( tracePath, new ElementSource( tracePath, assetPaths.Length, -1));
 						
 						for( i1 = 0; i1 < assetPaths.Length; ++i1)
 						{
@@ -128,43 +135,22 @@ namespace Finder
 								OnFinish();
 								return;
 							}
-							if( recursive != false)
-							{
-								if( founds.ContainsKey( targetPath) == false)
-								{
-									targetGuid = AssetDatabase.AssetPathToGUID( targetPath);
-									if( traceGuid != targetGuid)
-									{
-										founds.Add( targetPath, new ElementSource( targetPath));
-									}
-								}
-							}
-							else
+							if( founds.ContainsKey( targetPath) == false)
 							{
 								targetGuid = AssetDatabase.AssetPathToGUID( targetPath);
 								
 								if( traceGuid != targetGuid)
 								{
-									if( typeof( GameObject).Equals( 
-										AssetDatabase.GetMainAssetTypeAtPath( targetPath)) == false)
+									founds.Add( targetPath, new ElementSource( targetPath, -1, -1));
+									
+									if( CheckMissing( targetPath, founds, progress) == false)
 									{
-										if( founds.ContainsKey( targetPath) == false)
-										{
-											founds.Add( targetPath, new ElementSource( targetPath));
-										}
-									}
-									else
-									{
-										if( founds.ContainsKey( targetPath) == false)
-										{
-											founds.Add( targetPath, new ElementSource( targetPath));
-										}
+										OnFinish();
+										return;
 									}
 								}
 							}
 						}
-						traces.Add( tracePath, new ElementSource( tracePath, assetPaths.Length));
-						
 						if( CheckMissing( tracePath, traces, i0 * unitProgress) == false)
 						{
 							OnFinish();
@@ -177,11 +163,15 @@ namespace Finder
 			OnProgress( "Trace Dependents", 1);
 			OnFinish();
 		}
-		static bool CheckMissing( string tracePath, Dictionary<string, ElementSource> traces, float progress)
+		static bool CheckMissing( string targetPath, Dictionary<string, ElementSource> elements, float progress)
 		{
-			if( string.IsNullOrEmpty( tracePath) == false && AssetDatabase.IsValidFolder( tracePath) == false)
+			if( elements.TryGetValue( targetPath, out ElementSource target) == false)
 			{
-				System.Type assetType = AssetDatabase.GetMainAssetTypeAtPath( tracePath);
+				return true;
+			}
+			if( string.IsNullOrEmpty( targetPath) == false && AssetDatabase.IsValidFolder( targetPath) == false)
+			{
+				System.Type assetType = AssetDatabase.GetMainAssetTypeAtPath( targetPath);
 				
 				if( typeof( Material).Equals( assetType) != false
 				||	typeof( GameObject).Equals( assetType) != false
@@ -189,11 +179,12 @@ namespace Finder
 				||	typeof( LightingDataAsset).Equals( assetType) != false
 				||	typeof( ScriptableObject).IsAssignableFrom( assetType) != false)
 				{
-					Object[] assets = AssetDatabase.LoadAllAssetsAtPath( tracePath);
+					Object[] assets = AssetDatabase.LoadAllAssetsAtPath( targetPath);
+					string targetName = Path.GetFileName( targetPath);
 					
 					for( int i0 = 0; i0 < assets.Length; ++i0)
 					{
-						if( OnProgress( "Check Missing", tracePath, progress) != false)
+						if( OnProgress( "Check Missing", targetPath, progress) != false)
 						{
 							OnFinish();
 							return false;
@@ -209,29 +200,95 @@ namespace Finder
 						
 						var displayDirectory = new Stack<string>();
 						string currentDisplayName = string.Empty;
+						bool nextEnterChildren = true;
 						
-						while( property.Next( true) != false)
+						while( property.Next( nextEnterChildren) != false)
 						{
-							if( property.propertyPath.EndsWith( ".Array") == false
-							&&	property.propertyPath.EndsWith( ".Array.size") == false)
+							if( OnProgress( "Check Missing", $"{targetName}@{property.propertyPath}", progress) != false)
 							{
-								if( displayDirectory.Count < property.depth)
+								OnFinish();
+								return false;
+							}
+							nextEnterChildren = property.propertyType switch
+							{
+								SerializedPropertyType.Generic => (property.isArray == false) || property.arrayElementType switch
 								{
-									displayDirectory.Push( currentDisplayName);
-									currentDisplayName = property.displayName;
-								}
-								else if( displayDirectory.Count > property.depth)
+									"byte" => false,
+									"char" => false,
+									"int" => false,
+									"uint" => false,
+									"float" => false,
+									"float3" => false,
+									"string" => false,
+									"xform" => false,
+									"Axes" => false,
+									"Matrix4x4f" => false,
+									"MinMaxAABB" => false,
+									"VertexAttribute" => false,
+									"SubMesh" => false,
+									"SkeletonBone" => false,
+									"HumanBone" => false,
+									"ChannelInfo" => false,
+									"BlendShapeVertex" => false,
+									"MeshBlendShape" => false,
+									"MeshBlendShapeChannel" => false,
+									_ => true
+								},
+								SerializedPropertyType.Integer => false,
+								SerializedPropertyType.Boolean => false,
+								SerializedPropertyType.Float => false,
+								SerializedPropertyType.String => false,
+								SerializedPropertyType.Color => false,
+								SerializedPropertyType.ObjectReference => true,
+								SerializedPropertyType.LayerMask => false,
+								SerializedPropertyType.Enum => false,
+								SerializedPropertyType.Vector2 => false,
+								SerializedPropertyType.Vector3 => false,
+								SerializedPropertyType.Vector4 => false,
+								SerializedPropertyType.Rect => false,
+								SerializedPropertyType.ArraySize => true,
+								SerializedPropertyType.Character => true,
+								SerializedPropertyType.AnimationCurve => false,
+								SerializedPropertyType.Bounds => false,
+								SerializedPropertyType.Gradient => true,
+								SerializedPropertyType.Quaternion => false,
+								SerializedPropertyType.ExposedReference => true,
+								SerializedPropertyType.FixedBufferSize => true,
+								SerializedPropertyType.Vector2Int => false,
+								SerializedPropertyType.Vector3Int => false,
+								SerializedPropertyType.RectInt => false,
+								SerializedPropertyType.BoundsInt => false,
+								SerializedPropertyType.ManagedReference => true,
+								SerializedPropertyType.Hash128 => false,
+								_ => true
+							};
+							try
+							{
+								if( property.propertyPath.EndsWith( ".Array") == false
+								&&	property.propertyPath.EndsWith( ".Array.size") == false)
 								{
-									while( displayDirectory.Count > property.depth)
+									if( displayDirectory.Count < property.depth)
 									{
-										displayDirectory.Pop();
+										displayDirectory.Push( currentDisplayName);
+										currentDisplayName = property.displayName;
+									}
+									else if( displayDirectory.Count > property.depth)
+									{
+										while( displayDirectory.Count > property.depth)
+										{
+											displayDirectory.Pop();
+											currentDisplayName = property.displayName;
+										}
+									}
+									else
+									{
 										currentDisplayName = property.displayName;
 									}
 								}
-								else
-								{
-									currentDisplayName = property.displayName;
-								}
+							}
+							catch( System.Exception e)
+							{
+								Debug.LogError( e);
 							}
 							if( property.propertyType == SerializedPropertyType.ObjectReference && property.objectReferenceValue == null)
 							{
@@ -276,7 +333,7 @@ namespace Finder
 										}
 									}
 									string componentPath = string.Format( 
-										$"{tracePath}/{asset.GetType()} {property.propertyPath.Replace( "/" , "#")}");
+										$"{targetPath}/{asset.GetType()} {property.propertyPath.Replace( "/" , "#")}");
 									SerializedProperty gameObjectProperty = (property.type == "UnityEngine.GameObject")? 
 										property : serializedObject.FindProperty( "m_GameObject");
 									
@@ -289,20 +346,26 @@ namespace Finder
 									{
 										string foundKeyPath = string.Format( $"{componentPath}<{assetLocalId}>#{tryCount}");
 											
-										if( traces.ContainsKey( foundKeyPath) == false)
+										if( elements.ContainsKey( foundKeyPath) == false)
 										{
 											string displayPath = string.Join( '/', displayDirectory.Reverse());
 											displayPath = Path.Combine( displayPath, currentDisplayName).Replace( @"\", "/");
 											string name = string.Format( $"<{asset.GetType().Name}> {displayPath}");
-											traces.Add( foundKeyPath, new ElementComponentSource( 
-												name, asset.GetType(), hierarchyPath, assetLocalId, foundKeyPath, -1));
+											elements.Add( foundKeyPath, new ElementComponentSource( 
+												name, asset.GetType(), hierarchyPath, assetLocalId, foundKeyPath, -1, -2));
 											break;
 										}
 										++tryCount;
 									}
 									while( true);
 									
-									traces[ tracePath].Missing++;
+									int missingCount = target.Missing;
+									
+									if( missingCount < 0)
+									{
+										missingCount = 0;
+									}
+									target.Missing = ++missingCount;
 								}
 							}
 						}

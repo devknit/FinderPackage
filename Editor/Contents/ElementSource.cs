@@ -3,10 +3,11 @@ namespace Finder
 {
 	public class ElementSource
 	{
-		public ElementSource( string path, int reference=-1)
+		public ElementSource( string path, int reference, int missing)
 		{
 			m_Path = path;
 			m_Reference = reference;
+			m_Missing = missing;
 		}
 		public string Path
 		{
@@ -29,7 +30,7 @@ namespace Finder
 	public sealed class ElementComponentSource : ElementSource
 	{
 		public ElementComponentSource( string name, System.Type type, 
-			string path, int reference) : base( path, reference)
+			string path, int reference, int missing) : base( path, reference, missing)
 		{
 			m_Name = name;
 			m_Type = type;
@@ -37,7 +38,7 @@ namespace Finder
 			m_LocalId = 0;
 		}
 		public ElementComponentSource( string name, System.Type type, 
-			string findPath, long localId, string path, int reference) : base( path, reference)
+			string findPath, long localId, string path, int reference, int missing) : base( path, reference, missing)
 		{
 			m_Name = name;
 			m_Type = type;
