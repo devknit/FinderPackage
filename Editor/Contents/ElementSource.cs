@@ -30,14 +30,6 @@ namespace Finder
 	public sealed class ElementComponentSource : ElementSource
 	{
 		public ElementComponentSource( string name, System.Type type, 
-			string path, int reference, int missing) : base( path, reference, missing)
-		{
-			m_Name = name;
-			m_Type = type;
-			m_FindPath = string.Empty;
-			m_LocalId = 0;
-		}
-		public ElementComponentSource( string name, System.Type type, 
 			string findPath, long localId, string path, int reference, int missing) : base( path, reference, missing)
 		{
 			m_Name = name;

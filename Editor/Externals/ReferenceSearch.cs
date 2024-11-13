@@ -317,14 +317,18 @@ namespace Finder
 									int intstanceId = 0;
 									int tryCount = 0;
 									
-									if( asset is Component component)
+									Transform transform = asset switch
 									{
-										var transform = component.transform as Transform;
+										Component component => component.transform,
+										GameObject gameObject => gameObject.transform,
+										_ => null
+									};
+									if( transform != null)
+									{
+										AssetDatabase.TryGetGUIDAndLocalFileIdentifier( 
+											transform, out string assetGuid, out assetLocalId);
+										intstanceId = transform.GetInstanceID();
 										
-										if( transform != null)
-										{
-											intstanceId = transform.GetInstanceID();
-										}
 										while( transform != null)
 										{
 											hierarchyPath = (hierarchyPath.Length == 0)? 
@@ -333,26 +337,20 @@ namespace Finder
 										}
 									}
 									string componentPath = string.Format( 
-										$"{targetPath}/{asset.GetType()} {property.propertyPath.Replace( "/" , "#")}");
-									SerializedProperty gameObjectProperty = (property.type == "UnityEngine.GameObject")? 
-										property : serializedObject.FindProperty( "m_GameObject");
-									
-									if( gameObjectProperty?.objectReferenceValue is GameObject gameObject)
-									{
-										AssetDatabase.TryGetGUIDAndLocalFileIdentifier( 
-											gameObject.transform, out string assetGuid, out assetLocalId);
-									}
+										$"{targetPath}/{hierarchyPath}<{asset.GetType()}@{property.propertyPath.Replace( "/" , "#")}>");
 									do
 									{
-										string foundKeyPath = string.Format( $"{componentPath}<{assetLocalId}>#{tryCount}");
+										string foundKeyPath = string.Format( $"{componentPath}#{assetLocalId}-{tryCount}");
 											
 										if( elements.ContainsKey( foundKeyPath) == false)
 										{
 											string displayPath = string.Join( '/', displayDirectory.Reverse());
 											displayPath = Path.Combine( displayPath, currentDisplayName).Replace( @"\", "/");
-											string name = string.Format( $"<{asset.GetType().Name}> {displayPath}");
+											
+											string displayName = string.Format( $"{hierarchyPath}<{asset.GetType().Name}@{displayPath}>");
+											
 											elements.Add( foundKeyPath, new ElementComponentSource( 
-												name, asset.GetType(), hierarchyPath, assetLocalId, foundKeyPath, -1, -2));
+												displayName, asset.GetType(), hierarchyPath, assetLocalId, foundKeyPath, -1, -2));
 											break;
 										}
 										++tryCount;
