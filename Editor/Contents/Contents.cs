@@ -2,15 +2,16 @@
 using System.Linq;
 using UnityEngine;
 using UnityEditor;
+using System.Reflection;
 using System.Collections.Generic;
 
 namespace Finder
 {
 	public enum SearchType
 	{
-		kNone,
-		kTraceDependents,
-		kTracePrecedents,
+		None,
+		TraceDependents,
+		TracePrecedents,
 	}
 	[System.Serializable]
 	public sealed class Contents
@@ -53,6 +54,53 @@ namespace Finder
 		}
 		public void OnToolbarGUI()
 		{
+			if( m_SearchType != SearchType.None)
+			{
+				Rect searchTypeRect = EditorGUILayout.GetControlRect( GUILayout.Width( 160), GUILayout.Height( 17));
+				
+				var toolbarDropDownToggleRight = typeof( EditorStyles).GetProperty( 
+					"toolbarDropDownToggleRight", BindingFlags.Static | BindingFlags.NonPublic).GetValue( null) as GUIStyle;
+				var toolbarDropDownToggleButton = typeof( EditorStyles).GetProperty( 
+					"toolbarDropDownToggleButton", BindingFlags.Static | BindingFlags.NonPublic).GetValue( null) as GUIStyle;
+				
+				Rect buttonRect = searchTypeRect;
+				Rect popupRect = searchTypeRect;
+				buttonRect.xMax -= 16;
+				popupRect.xMin = popupRect.xMax - 16;
+				
+				if( EditorGUI.DropdownButton( popupRect, GUIContent.none, FocusType.Passive, toolbarDropDownToggleButton) != false)
+				{
+					var menu = new GenericMenu();
+					
+					menu.AddItem(new GUIContent( kSearchTypes[ 1]), false, () =>
+					{
+						m_SearchType = SearchType.TraceDependents;
+						ResearchAssets();
+					});
+					menu.AddItem(new GUIContent( kSearchTypes[ 2]), false, () =>
+					{
+						m_SearchType = SearchType.TracePrecedents;
+						ResearchAssets();
+					});
+					menu.DropDown( buttonRect);
+				}
+				else if( GUI.Button( buttonRect, new GUIContent( kSearchTypes[ (int)m_SearchType]), toolbarDropDownToggleRight))
+				{
+					ResearchAssets();
+				}
+				using( new EditorGUILayout.HorizontalScope( EditorStyles.toolbar))
+				{
+					bool newRecursive = EditorGUILayout.ToggleLeft( "Recursive", m_Recursive, GUILayout.Width( 80));
+					
+					if( m_Recursive != newRecursive)
+					{
+						m_Recursive = newRecursive;
+						ResearchAssets();
+					}
+				}
+			}
+			GUILayout.FlexibleSpace();
+			
 			var newClickType = (ClickType)EditorGUILayout.Popup( (int)m_ClickType, kClickTypes, EditorStyles.toolbarPopup, GUILayout.Width( 120));
 			if( m_ClickType != newClickType)
 			{
@@ -69,26 +117,6 @@ namespace Finder
 					m_Search.SetClickType( newClickType);
 				}
 				m_ClickType = newClickType;
-			}
-			if( m_SearchType != SearchType.kNone)
-			{
-				using( new EditorGUILayout.HorizontalScope( EditorStyles.toolbar))
-				{
-					var newSearchType = (SearchType)EditorGUILayout.Popup( (int)m_SearchType, kSearchTypes, EditorStyles.toolbarPopup, GUILayout.Width( 140));
-					if( m_SearchType != newSearchType)
-					{
-						m_SearchType = newSearchType;
-						ResearchAssets();
-					}
-					bool newRecursive = EditorGUILayout.ToggleLeft( "Recursive", m_Recursive, GUILayout.Width( 80));
-					
-					if( m_Recursive != newRecursive)
-					{
-						m_Recursive = newRecursive;
-						ResearchAssets();
-					}
-					GUILayout.FlexibleSpace();
-				}
 			}
 		}
 		public void OnProjectChange()
@@ -112,8 +140,6 @@ namespace Finder
 		}
 		public void OnTargetGUI()
 		{
-			OnSearchToolbarGUI();
-			
 			if( m_Target == null)
 			{
 				m_Target = new Explorer( new List<Element>(), View.Column.kName | View.Column.kReference | View.Column.kMissing);
@@ -124,8 +150,6 @@ namespace Finder
 		}
 		public void OnSearchGUI()
 		{
-			OnSearchToolbarGUI();
-			
 			if( m_Search == null)
 			{
 				m_Search = new Explorer( new List<Element>(), View.Column.kDefault);
@@ -133,9 +157,6 @@ namespace Finder
 				m_Search.ColumnHeaderResizeToFit();
 			}
 			m_Search.OnGUI( this);
-		}
-		public void OnSearchToolbarGUI()
-		{
 		}
 		List<Element> GetAllAssetElements()
 		{
@@ -172,12 +193,12 @@ namespace Finder
 			
 			switch( newSearchType)
 			{
-				case SearchType.kTracePrecedents:
+				case SearchType.TracePrecedents:
 				{
 					Search.TracePrecedents( assetGuids, m_Recursive, out targets, out searches);
 					break;
 				}
-				case SearchType.kTraceDependents:
+				case SearchType.TraceDependents:
 				{
 					Search.TraceDependents( assetGuids, m_Recursive, out targets, out searches);
 					break;
@@ -220,7 +241,7 @@ namespace Finder
 		}
 		public bool ResearchAssets()
 		{
-			if( m_TargetGuids != null && m_SearchType != SearchType.kNone)
+			if( m_TargetGuids != null && m_SearchType != SearchType.None)
 			{
 				SearchAssets( m_TargetGuids, m_SearchType);
 				return true;

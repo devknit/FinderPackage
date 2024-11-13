@@ -326,22 +326,22 @@ namespace Finder
 						contextMenu.AddItem( new GUIContent( "Select To Dependencies/New Window"), false, () =>
 						{
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
-							contents?.OpenSearchAssets( elements, SearchType.kTraceDependents);
+							contents?.OpenSearchAssets( elements, SearchType.TraceDependents);
 						});
 						contextMenu.AddItem( new GUIContent( "Select To Dependencies/Current Window"), false, () =>
 						{
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
-							contents?.SearchAssets( elements, SearchType.kTraceDependents);
+							contents?.SearchAssets( elements, SearchType.TraceDependents);
 						});
 						contextMenu.AddItem( new GUIContent( "Select From Dependencies/New Window"), false, () =>
 						{
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
-							contents?.OpenSearchAssets( elements, SearchType.kTracePrecedents);
+							contents?.OpenSearchAssets( elements, SearchType.TracePrecedents);
 						});
 						contextMenu.AddItem( new GUIContent( "Select From Dependencies/Current Window"), false, () =>
 						{
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
-							contents?.SearchAssets( elements, SearchType.kTracePrecedents);
+							contents?.SearchAssets( elements, SearchType.TracePrecedents);
 						});
 					#if false
 						if( m_View.ContainsSeelctedElements( AssetType.kMaterial, x => x.AssetType) != false)

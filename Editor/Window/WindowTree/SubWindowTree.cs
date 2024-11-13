@@ -251,7 +251,7 @@ namespace MDI.Editor.Internal
 			}
 			ListenEvent();
 		}
-		public void DrawViewButton(Rect rect)
+		public void DrawViewButton( Rect rect)
 		{
 			// Rect rect = EditorGUILayout.GetControlRect( GUILayout.Width( 70), GUILayout.Height( 17));
 			if( GUIEx.ToolbarButton( rect, "Tabs") != false)

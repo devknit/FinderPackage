@@ -27,22 +27,22 @@ namespace Finder
 				s_ActiveWindows = null;
 			}
 		}
-		[MenuItem( "Assets/Finder/Open &f", priority = 21)]
+		[MenuItem( "Assets/Finder/Open", priority = 21)]
 		static void OpenFinder()
 		{
 			CreateNewWindow<Finder>( null).Show();
 		}
-		[MenuItem("Assets/Finder/Select To Dependencies", true, priority = 22)]
+		[MenuItem("Assets/Finder/Select To Dependencies &f", true, priority = 22)]
 		static bool IsTraceDependents()
 		{
 			return Selection.assetGUIDs?.Length > 0;
 		}
-		[MenuItem("Assets/Finder/Select To Dependencies", false, priority = 22)]
+		[MenuItem("Assets/Finder/Select To Dependencies &f", false, priority = 22)]
 		static void TraceDependents()
 		{
 			var window = CreateNewWindow<Finder>( null);
 			window.Show();
-			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.kTraceDependents);
+			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.TraceDependents);
 		}
 		[MenuItem("Assets/Finder/Select From Dependencies", true, priority = 23)]
 		static bool IsTracePrecedents()
@@ -54,7 +54,7 @@ namespace Finder
 		{
 			var window = CreateNewWindow<Finder>( null);
 			window.Show();
-			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.kTracePrecedents);
+			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.TracePrecedents);
 		}
 		public void AddItemsToMenu( GenericMenu menu)
 		{
@@ -159,7 +159,7 @@ namespace Finder
 			}
 			GUILayout.EndArea();
 		}
-		[SubWindow( "Target", SubWindowIcon.Project)]
+		[SubWindow( "Select", SubWindowIcon.Project)]
 		void OnTargetGUI( Rect rect)
 		{
 			GUILayout.BeginArea( rect);
@@ -168,7 +168,7 @@ namespace Finder
 			}
 			GUILayout.EndArea();
 		}
-		[SubWindow( "Search", SubWindowIcon.Search)]
+		[SubWindow( "Dependent", SubWindowIcon.Search)]
 		void OnSearchGUI( Rect rect)
 		{
 			GUILayout.BeginArea( rect);

@@ -66,7 +66,6 @@ namespace Finder
                     var element = new Element
                     {
                         id = path.GetHashCode(),
-                        Extension = System.IO.Path.GetExtension( path),
                         Path = path,
                         Guid = guid,
                         icon = AssetDatabase.GetCachedIcon( path) as Texture2D,
@@ -76,12 +75,14 @@ namespace Finder
                     if( element.Directory != false)
 					{
 						element.name = System.IO.Path.GetFileName( path);
+						element.Extension = string.Empty;
 						element.AssetType = AssetType.kDirectory;
 						element.Reference = -1;
 					}
 					else
 					{
 						element.name = System.IO.Path.GetFileNameWithoutExtension( path);
+						element.Extension = System.IO.Path.GetExtension( path);
 						
 						if( AssetTypes.kExtensions.TryGetValue( element.Extension, out AssetType assetType) != false)
 						{

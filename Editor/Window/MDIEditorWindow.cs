@@ -294,12 +294,10 @@ namespace MDI.Editor
 			
 			if( m_WindowTree != null)
 			{
-			#if false
-				m_WindowTree.DrawLayoutButton( new Rect( rect.x + rect.width - offset, rect.y, 70, rect.height));
-				offset += 70;
-			#endif
+				// m_WindowTree.DrawLayoutButton( new Rect( rect.x + rect.width - offset, rect.y, 70, rect.height));
+				// offset += 70;
 				m_WindowTree.DrawViewButton( new Rect( rect.x + rect.width - offset, rect.y, 70, rect.height));
-				offset += 70;
+				// offset += 70;
 			}
 			GUILayout.BeginArea( new Rect( rect.x + 6, rect.y, rect.width - offset, rect.height));
 			GUILayout.BeginHorizontal();
