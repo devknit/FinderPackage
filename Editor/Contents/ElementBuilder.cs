@@ -4,18 +4,18 @@ using System.Collections.Generic;
 
 namespace Finder
 {
-	public sealed class ElementBuilder
+	internal sealed class ElementBuilder
 	{
-		public ElementBuilder()
+		internal ElementBuilder()
 		{
 			m_RootElements = new List<Element>();
 			m_Registered = new SortedDictionary<string, Element>();
 		}
-		public List<Element> ToList()
+		internal List<Element> ToList()
 		{
 			return m_RootElements.ToList();
 		}
-		public bool Append( ElementSource source)
+		internal bool Append( ElementSource source)
 		{
 			if( source != null && string.IsNullOrEmpty( source.Path) == false)
 			{
@@ -68,7 +68,7 @@ namespace Finder
 			}
 			return false;
 		}
-		public bool Append( string assetPath, int reference=-1)
+		internal bool Append( string assetPath, int reference=-1)
 		{
 			if( string.IsNullOrEmpty( assetPath) == false)
 			{

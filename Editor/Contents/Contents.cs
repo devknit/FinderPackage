@@ -8,9 +8,9 @@ using System.Collections.Generic;
 namespace Finder
 {
 	[System.Serializable]
-	public sealed class Contents
+	internal sealed class Contents
 	{
-		public void OnEnable( System.Func<Contents> onCreateWindowContens)
+		internal void OnEnable( System.Func<Contents> onCreateWindowContens)
 		{
 			m_ChangeProject = true;
 			m_OnCreateWindowContens = onCreateWindowContens;
@@ -31,7 +31,7 @@ namespace Finder
 				m_Dependent.ColumnHeaderResizeToFit();
 			}
 		}
-		public void OnDisable()
+		internal void OnDisable()
 		{
 			if( m_Project != null)
 			{
@@ -46,7 +46,7 @@ namespace Finder
 				m_Dependent.OnDisable();
 			}
 		}
-		public void OnToolbarGUI()
+		internal void OnToolbarGUI()
 		{
 			if( m_FindMode != FindReference.Mode.None)
 			{
@@ -113,11 +113,11 @@ namespace Finder
 				m_ClickType = newClickType;
 			}
 		}
-		public void OnProjectChange()
+		internal void OnProjectChange()
 		{
 			m_ChangeProject = true;
 		}
-		public void OnProjectGUI()
+		internal void OnProjectGUI()
 		{
 			if( m_Project == null)
 			{
@@ -132,7 +132,7 @@ namespace Finder
 			m_ChangeProject = false;
 			m_Project.OnGUI( this);
 		}
-		public void OnSelectGUI()
+		internal void OnSelectGUI()
 		{
 			if( m_Select == null)
 			{
@@ -142,7 +142,7 @@ namespace Finder
 			}
 			m_Select.OnGUI( this);
 		}
-		public void OnDependentGUI()
+		internal void OnDependentGUI()
 		{
 			if( m_Dependent == null)
 			{
@@ -170,12 +170,12 @@ namespace Finder
 			EditorUtility.ClearProgressBar();
 			return builder.ToList();
 		}
-		public void OpenFindAssets( IEnumerable<string> assetGuids, FindReference.Mode newFindType)
+		internal void OpenFindAssets( IEnumerable<string> assetGuids, FindReference.Mode newFindType)
 		{
 			Contents contents = m_OnCreateWindowContens?.Invoke();
 			contents?.FindAssets( assetGuids, newFindType);
 		}
-		public void FindAssets( IEnumerable<string> assetGuids, FindReference.Mode newFindType)
+		internal void FindAssets( IEnumerable<string> assetGuids, FindReference.Mode newFindType)
 		{
 			FindReference.Execute( 
 				newFindType, assetGuids, m_Recursive, 
@@ -214,7 +214,7 @@ namespace Finder
 			m_SelectGuids = assetGuids.ToArray();
 			m_FindMode = newFindType;
 		}
-		public bool RefindAssets()
+		internal bool RefindAssets()
 		{
 			if( m_SelectGuids != null && m_FindMode != FindReference.Mode.None)
 			{

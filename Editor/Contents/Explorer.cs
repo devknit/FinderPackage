@@ -10,16 +10,16 @@ using System.Collections.Generic;
 namespace Finder
 {
 	[System.Serializable]
-	public sealed class Explorer : ISerializationCallbackReceiver
+	internal sealed class Explorer : ISerializationCallbackReceiver
 	{
-		public Explorer( List<Element> elements, View.Column columnMask) 
+		internal Explorer( List<Element> elements, View.Column columnMask) 
 		{
 			m_HeaderState = View.CreateHeaderState( columnMask);
 			m_ViewState = new TreeViewState();
 			m_SerializableElement = new SerializableElementRoot();
 			m_Elements = elements;
 		}
-		public void OnEnable( ClickType clickType)
+		internal void OnEnable( ClickType clickType)
 		{
 			if( EditorGUIUtility.isProSkin == false)
 			{
@@ -59,43 +59,43 @@ namespace Finder
 			m_SearchFilter.Change( m_View.searchString);
 			Apply( m_Elements);
 		}
-		public void OnDisable()
+		internal void OnDisable()
 		{
 			m_SearchField.downOrUpArrowKeyPressed -= m_View.SetFocusAndEnsureSelectedItem;
 		}
-		public void SetClickType( ClickType type)
+		internal void SetClickType( ClickType type)
 		{
 			m_View.SetClickType( type);
 		}
-		public void Apply( List<Element> src)
+		internal void Apply( List<Element> src)
 		{
 			m_Elements = src;
 			m_View.Apply( m_Elements, View.Type.Tree);
 		}
-		public void Apply()
+		internal void Apply()
 		{
 			if( m_Elements != null)
 			{
 				m_View.Apply( m_Elements, View.Type.Tree);
 			}
 		}
-		public void ExpandAll()
+		internal void ExpandAll()
 		{
 			m_View.ExpandAll();
 		}
-		public void CollapseAll()
+		internal void CollapseAll()
 		{
 			m_View.CollapseAll();
 		}
-		public void ColumnHeaderResizeToFit()
+		internal void ColumnHeaderResizeToFit()
 		{
 			m_View.multiColumnHeader.ResizeToFit();
 		}
-		public void SetColumnHeaderEnable( View.Column column, bool bEnable)
+		internal void SetColumnHeaderEnable( View.Column column, bool bEnable)
 		{
 			m_View.SetColumnHeaderEnable( column, bEnable);
 		}
-		public void OnGUI( Contents contents)
+		internal void OnGUI( Contents contents)
 		{
 			Event ev = Event.current;
 			

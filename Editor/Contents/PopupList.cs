@@ -6,37 +6,37 @@ using System.Collections.Generic;
 
 namespace Finder
 {
-	public class PopupList : PopupWindowContent
+	internal class PopupList : PopupWindowContent
 	{
-		public class Element
+		internal class Element
 		{
-			public Element( string text)
+			internal Element( string text)
 			{
 				m_Content = new GUIContent( text);
 			}
-			public string Label
+			internal string Label
 			{
 				get{ return m_Content.text; }
 			}
-			public GUIContent Content
+			internal GUIContent Content
 			{
 				get{ return m_Content; }
 			}
-			public bool Selected
+			internal bool Selected
 			{
 				get{ return m_Selected; }
-				internal set{ m_Selected = value; }
+				set{ m_Selected = value; }
 			}
             readonly GUIContent m_Content;
 			bool m_Selected;
 		}
-		public class InputData
+		internal class InputData
 		{
-			public InputData()
+			internal InputData()
 			{
 				elements = new List<Element>();
 			}
-			public Element NewOrMatchingElement( string label)
+			internal Element NewOrMatchingElement( string label)
 			{
 				foreach( var element in elements)
 				{
@@ -50,10 +50,10 @@ namespace Finder
 				
 				return newElement;
 			}
-			public List<Element> elements;
-			public Action<Element> onSelectCallback;
+			internal List<Element> elements;
+			internal Action<Element> onSelectCallback;
 		}
-		public PopupList( InputData inputData)
+		internal PopupList( InputData inputData)
 		{
 			m_InputData = inputData;
 		}
@@ -129,8 +129,8 @@ namespace Finder
 		
 		class Styles
 		{
-			public GUIStyle menuItem = "MenuItem";
-			public GUIStyle background = "grey_border";
+			internal GUIStyle menuItem = "MenuItem";
+			internal GUIStyle background = "grey_border";
 		}
 		static Styles s_Styles;
 		

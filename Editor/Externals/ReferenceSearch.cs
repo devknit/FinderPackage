@@ -8,15 +8,15 @@ using UnityEditor.Animations;
 
 namespace Finder
 {
-	public sealed class FindReference
+	internal sealed class FindReference
 	{
-		public enum Mode
+		internal enum Mode
 		{
 			None,
 			ToDependencies,
 			FromDependencies,
 		}
-		public static void Execute( Mode mode,
+		internal static void Execute( Mode mode,
 			IEnumerable<string> targetGuids, bool recursive,
 			out Dictionary<string, ElementSource> targets,
 			out Dictionary<string, ElementSource> results)
@@ -41,7 +41,7 @@ namespace Finder
 				}
 			}
 		}
-		public static void ToDependencies( 
+		static void ToDependencies( 
 			IEnumerable<string> targetGuids, bool recursive,
 			out Dictionary<string, ElementSource> targets,
 			out Dictionary<string, ElementSource> results)
@@ -111,7 +111,7 @@ namespace Finder
 			OnProgress( "Find To Dependencies", 1);
 			OnFinish();
 		}
-		public static void FromDependencies( 
+		static void FromDependencies( 
 			IEnumerable<string> targetGuids, bool recursive,
 			out Dictionary<string, ElementSource> targets,
 			out Dictionary<string, ElementSource> results)

@@ -10,7 +10,7 @@ using UnityEditorInternal;
 
 namespace Finder
 {
-	public enum ClickType
+	internal enum ClickType
 	{
 		None,
 		Ping,
@@ -18,14 +18,14 @@ namespace Finder
 		Active,
 		ActiveFileOnly
 	}
-	public sealed class View : TreeView
+	internal sealed class View : TreeView
 	{
-		public enum Type
+		internal enum Type
 		{
 			Tree,
 			List
 		}
-		public enum Column
+		internal enum Column
 		{
 			None = 0x00,
 			Name = 0x01,
@@ -40,7 +40,7 @@ namespace Finder
 			Dependent = Name | Missing | Reference,
 			All = Name | Extension | Path | Guid | Missing | Reference
 		}
-		public static MultiColumnHeaderState CreateHeaderState( Column columnMask=Column.None)
+		internal static MultiColumnHeaderState CreateHeaderState( Column columnMask=Column.None)
 		{
 			var columns = new []
 			{
@@ -122,7 +122,7 @@ namespace Finder
 			}
 			return headerState;
 		}
-		public View( TreeViewState treeViewState, 
+		internal View( TreeViewState treeViewState, 
 			MultiColumnHeader multiColumnHeader, 
 			SearchFilter exploereSearchFilter) :
 			base( treeViewState, multiColumnHeader) 
@@ -161,11 +161,11 @@ namespace Finder
 			multiColumnHeader.height = EditorGUIUtility.singleLineHeight + 4;
 			multiColumnHeader.sortingChanged += OnSortingChanged;
 		}
-		public void SetClickType( ClickType type)
+		internal void SetClickType( ClickType type)
 		{
 			m_ClickType = type;
 		}
-		public void Apply( List<Element> src, Type viewType)
+		internal void Apply( List<Element> src, Type viewType)
 		{
 			switch( viewType)
 			{
@@ -201,7 +201,7 @@ namespace Finder
 				SetExpanded( "Assets".GetHashCode(), true);
 			}
 		}
-		public void SetColumnHeaderEnable( View.Column column, bool bEnable)
+		internal void SetColumnHeaderEnable( View.Column column, bool bEnable)
 		{
 			var visibleColumns = multiColumnHeader.state.visibleColumns.ToList();
 			
@@ -227,23 +227,23 @@ namespace Finder
 			}
 			multiColumnHeader.state.visibleColumns = visibleColumns.ToArray();
 		}
-		public Rect GetViewRect()
+		internal Rect GetViewRect()
 		{
 			return treeViewRect;
 		}
-		public int GetSelectedCount()
+		internal int GetSelectedCount()
 		{
 			return state.selectedIDs.Count;
 		}
-		public IEnumerable<TreeViewItem> FindRowElements( List<int> ids)
+		internal IEnumerable<TreeViewItem> FindRowElements( List<int> ids)
 		{
 			return GetRows().Where( x => ids.Contains( x.id));
 		}
-		public IEnumerable<TreeViewItem> FindRowElements( System.Func<Element, bool> onWhere)
+		internal IEnumerable<TreeViewItem> FindRowElements( System.Func<Element, bool> onWhere)
 		{
 			return GetRows().Where( x => onWhere?.Invoke( x as Element) ?? false);
 		}
-		public bool ContainsSeelctedElements<T>( T value, System.Func<Element, T> onComparer)
+		internal bool ContainsSeelctedElements<T>( T value, System.Func<Element, T> onComparer)
 		{
 			if( state.selectedIDs.Count > 0)
 			{
@@ -259,12 +259,12 @@ namespace Finder
 			}
 			return false;
 		}
-		public Element FirstSelectedElements( System.Func<Element, bool> onPredicate)
+		internal Element FirstSelectedElements( System.Func<Element, bool> onPredicate)
 		{
 			List<int> ids = state.selectedIDs;
 			return GetRows().First( x => ids.Contains( x.id) && onPredicate( x as Element)) as Element;
 		}
-		public IEnumerable<T> SelectSelectedElements<T>( System.Func<Element, T> onSelector)
+		internal IEnumerable<T> SelectSelectedElements<T>( System.Func<Element, T> onSelector)
 		{
 			if( state.selectedIDs.Count > 0)
 			{
@@ -272,7 +272,7 @@ namespace Finder
 			}
 			return null;
 		}
-		public IEnumerable<T> SelectSelectedElements<T>( System.Func<Element, bool> onWhere, System.Func<Element, T> onSelector)
+		internal IEnumerable<T> SelectSelectedElements<T>( System.Func<Element, bool> onWhere, System.Func<Element, T> onSelector)
 		{
 			if( state.selectedIDs.Count > 0)
 			{

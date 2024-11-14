@@ -11,9 +11,9 @@ using UnityEditor.IMGUI.Controls;
 namespace Finder
 {
 #if WITH_TREEVIEWITEM
-	public sealed class Element : TreeViewItem
+	internal sealed class Element : TreeViewItem
 #else
-	public sealed class Element
+	internal sealed class Element
 #endif
 	{
 		static string EnclosedString( string src, string begin, string end)
@@ -26,7 +26,7 @@ namespace Finder
 			}
 			return string.Empty;
 		}
-		public static Element Create( ElementSource source)
+		internal static Element Create( ElementSource source)
 		{
 			if( source is ElementComponentSource component)
 			{
@@ -40,7 +40,7 @@ namespace Finder
                     Directory = false,
                     Reference = component.Reference,
                     Missing = component.Missing,
-                    AssetType = AssetType.kComponent,
+                    AssetType = AssetType.Component,
                     LocalId = component.LocalId,
                     FindPath = component.FindPath
                 };
@@ -51,7 +51,7 @@ namespace Finder
 			}
 			return Create( source.Path, source.Reference, source.Missing);
 		}
-		public static Element Create( string path, int reference=-1, int missing=-1)
+		internal static Element Create( string path, int reference=-1, int missing=-1)
 		{
 			if( string.IsNullOrEmpty( path) == false && path.IndexOf( ":") < 0)
 			{
@@ -77,7 +77,7 @@ namespace Finder
 					{
 						element.name = System.IO.Path.GetFileName( path);
 						element.Extension = string.Empty;
-						element.AssetType = AssetType.kDirectory;
+						element.AssetType = AssetType.Directory;
 						element.Reference = -1;
 					}
 					else
@@ -91,7 +91,7 @@ namespace Finder
 						}
 						else
 						{
-							element.AssetType = AssetType.kUnknown;
+							element.AssetType = AssetType.Unknown;
 						}
 						element.Reference = reference;
 					}
@@ -100,7 +100,7 @@ namespace Finder
 			}
 			return null;
 		}
-		public static void TreeViewSort( List<Element> elements)
+		internal static void TreeViewSort( List<Element> elements)
 		{
 			if( elements.Count > 0)
 			{
@@ -112,7 +112,7 @@ namespace Finder
 				});
 			}
 		}
-		public static void ListViewSort( List<Element> elements)
+		internal static void ListViewSort( List<Element> elements)
 		{
 			if( elements.Count > 0)
 			{
@@ -122,7 +122,7 @@ namespace Finder
 				});
 			}
 		}
-		public Element()
+		internal Element()
 		{
 			ChildElements = new List<Element>();
 		#if WITH_TREEVIEWITEM
@@ -130,7 +130,7 @@ namespace Finder
 		#endif
 		}
 	#if WITH_TREEVIEWITEM
-		public Element( Element src)
+		internal Element( Element src)
 		{
 			id = src.id;
 			depth = src.depth;
@@ -150,9 +150,9 @@ namespace Finder
 			parent = src.parent;
 			children = src.children;
 		}
-		public Element( SerializableElementNode node, List<Element> srcChildElements, List<TreeViewItem> srcChildren)
+		internal Element( SerializableElementNode node, List<Element> srcChildElements, List<TreeViewItem> srcChildren)
 	#else
-		public Element( SerializableElementNode node, List<Element> srcChildElements)
+		internal Element( SerializableElementNode node, List<Element> srcChildElements)
 	#endif
 		{
 			id = node.id;
@@ -182,7 +182,7 @@ namespace Finder
 			}
 		#endif
 		}
-		public void Add( Element element)
+		internal void Add( Element element)
 		{
 			if( element.ParentElement != null)
 			{
@@ -196,7 +196,7 @@ namespace Finder
 			element.ParentElement = this;
 			element.depth = depth + 1;
 		}
-		public void Remove( Element element)
+		internal void Remove( Element element)
 		{
 			if( ChildElements.Contains( element) != false)
 			{
@@ -209,11 +209,11 @@ namespace Finder
 				element.depth = 0;
 			}
 		}
-		public bool IsFile()
+		internal bool IsFile()
 		{
-			return Directory == false && AssetType != AssetType.kComponent;
+			return Directory == false && AssetType != AssetType.Component;
 		}
-		public bool CheckFilter( SearchFilter filter)
+		internal bool CheckFilter( SearchFilter filter)
 		{
 			bool bValid = false;
 			
@@ -236,11 +236,11 @@ namespace Finder
 			}
 			return bValid;
 		}
-		public bool CanOpenAsset()
+		internal bool CanOpenAsset()
 		{
 			return true;
 		}
-		public void OpenAsset()
+		internal void OpenAsset()
 		{
 			if( LocalId != 0 && string.IsNullOrEmpty( FindPath) == false)
 			{
@@ -255,11 +255,11 @@ namespace Finder
 				AssetDatabase.OpenAsset( AssetDatabase.LoadMainAssetAtPath( Path));
 			}
 		}
-		public bool CanPingObject()
+		internal bool CanPingObject()
 		{
 			return true;
 		}
-		public void PingObject( bool bDirectory)
+		internal void PingObject( bool bDirectory)
 		{
 			if( bDirectory != false || Directory == false)
 			{
@@ -277,11 +277,11 @@ namespace Finder
 				}
 			}
 		}
-		public bool CanActiveObject()
+		internal bool CanActiveObject()
 		{
 			return true;
 		}
-		public void ActiveObject( bool bDirectory)
+		internal void ActiveObject( bool bDirectory)
 		{
 			if( bDirectory != false || Directory == false)
 			{
@@ -423,40 +423,40 @@ namespace Finder
 		public override string displayName{ get{ return name; } set{} }
 	#endif
 	#if !WITH_TREEVIEWITEM
-		public int id{ get; private set; }
-		public int depth{ get; private set; }
+		internal int id{ get; private set; }
+		internal int depth{ get; private set; }
 	#endif
-		public string name{ get; private set; }
-		public string Extension{ get; private set; }
-		public string Path{ get; private set; }
-		public string Guid{ get; private set; }
-		public string FindPath{ get; private set; }
-		public AssetType AssetType{ get; private set; }
+		internal string name{ get; private set; }
+		internal string Extension{ get; private set; }
+		internal string Path{ get; private set; }
+		internal string Guid{ get; private set; }
+		internal string FindPath{ get; private set; }
+		internal AssetType AssetType{ get; private set; }
 	#if !WITH_TREEVIEWITEM
-		public Texture2D icon{ get; private set; }
+		internal Texture2D icon{ get; private set; }
 	#endif
-		public bool Directory{ get; private set; }
-		public int Reference{ get; private set; }
-		public int Missing{ get; private set; }
-		public long LocalId{ get; private set; }
-		public Element ParentElement{ get; internal set; }
-		public List<Element> ChildElements{ get; internal set; }
+		internal bool Directory{ get; private set; }
+		internal int Reference{ get; private set; }
+		internal int Missing{ get; private set; }
+		internal long LocalId{ get; private set; }
+		internal Element ParentElement{ get; set; }
+		internal List<Element> ChildElements{ get; set; }
 		
-		public int ValidCount{ get; internal set; }
+		internal int ValidCount{ get; set; }
 	}
 	[System.Serializable]
-	public class SerializableElementRoot
+	internal class SerializableElementRoot
 	{
-		public SerializableElementRoot()
+		internal SerializableElementRoot()
 		{
 			root = new List<SerializableElementNode>();
 		}
-		public void OnBeforeSerialize( Element element)
+		internal void OnBeforeSerialize( Element element)
 		{
 			root.Clear();
 			Serialize( element);
 		}
-		public Element OnAfterDeserialize()
+		internal Element OnAfterDeserialize()
 		{
 			if( root.Count > 0)
 			{
@@ -510,9 +510,9 @@ namespace Finder
 		List<SerializableElementNode> root;
 	}
 	[System.Serializable]
-	public class SerializableElementNode
+	internal class SerializableElementNode
 	{
-		public SerializableElementNode( Element element, int index)
+		internal SerializableElementNode( Element element, int index)
 		{
 			id = element.id;
 			depth = element.depth;
@@ -531,34 +531,34 @@ namespace Finder
 			IndexOfFirstChild = index;
 		}
 		[SerializeField]
-		public int id;
+		internal int id;
 		[SerializeField]
-		public int depth;
+		internal int depth;
 		[SerializeField]
-		public string name;
+		internal string name;
 		[SerializeField]
-		public string Extension;
+		internal string Extension;
 		[SerializeField]
-		public string Path;
+		internal string Path;
 		[SerializeField]
-		public string Guid;
+		internal string Guid;
 		[SerializeField]
-		public string FindPath;
+		internal string FindPath;
 		[SerializeField]
-		public AssetType AssetType;
+		internal AssetType AssetType;
 		[SerializeField]
-		public Texture2D icon;
+		internal Texture2D icon;
 		[SerializeField]
-		public bool Directory;
+		internal bool Directory;
 		[SerializeField]
-		public int Reference;
+		internal int Reference;
 		[SerializeField]
-		public int Missing;
+		internal int Missing;
 		[SerializeField]
-		public long LocalId;
+		internal long LocalId;
 		[SerializeField]
-		public int ChildCount;
+		internal int ChildCount;
 		[SerializeField]
-		public int IndexOfFirstChild;
+		internal int IndexOfFirstChild;
 	}
-} /* namespace Finder */
+}

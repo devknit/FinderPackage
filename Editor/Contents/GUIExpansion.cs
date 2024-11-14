@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace Finder
 {
-	public static class GUIExpansion
+	internal static class GUIExpansion
 	{
-		public static int Toggle( bool value, GUIContent content, GUIStyle style, params GUILayoutOption[] options)
+		internal static int Toggle( bool value, GUIContent content, GUIStyle style, params GUILayoutOption[] options)
 		{
 			Rect rect = GUILayoutUtility.GetRect( content, style, options);
 			return DoToggle( rect, GUIUtility.GetControlID( kToggleHash, FocusType.Passive, rect), value, content, style);

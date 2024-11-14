@@ -3,38 +3,38 @@ using System.Collections.Generic;
 
 namespace Finder
 {
-	public enum AssetType
+	internal enum AssetType
 	{
-		kUnknown,
-		kDirectory,
-		kComponent,
-		kAnimationController,
-		kAnimationClip,
-		kAudioClip,
-		kAudioMixer,
-		kComputeShader,
-	//	kCubemap,
-		kFont,
-		kGUISkin,
-		kMaterial,
-		kModel,
-		kPhysicMaterial,
-		kPrefab,
-		kScene,
-		kScript,
-		kScriptableObject,
-		kShader,
-		kTextAsset,
-		kTexture,
-		kVideoClip,
+		Unknown,
+		Directory,
+		Component,
+		AnimationController,
+		AnimationClip,
+		AudioClip,
+		AudioMixer,
+		ComputeShader,
+	//	Cubemap,
+		Font,
+		GUISkin,
+		Material,
+		Model,
+		PhysicMaterial,
+		Prefab,
+		Scene,
+		Script,
+		ScriptableObject,
+		Shader,
+		TextAsset,
+		Texture,
+		VideoClip,
 	}
 	/* AssetDatabase.GetMainAssetTypeAtPath() 
 	 * を使った型判断だと読み込みが発生してしまうため
 	 * 暫定として拡張子から型を判断する
 	 */
-	public sealed class AssetTypes
+	internal sealed class AssetTypes
 	{
-		public static readonly string[] kTypeNames = new string[]
+		internal static readonly string[] kTypeNames = new string[]
 		{
 			"AnimationController",
 			"AnimationClip",
@@ -55,169 +55,168 @@ namespace Finder
 			"Texture",
 			"VideoClip",
 		};
-		public static readonly Dictionary<string, AssetType> kFilters =
-			new Dictionary<string, AssetType>( System.StringComparer.OrdinalIgnoreCase)
+		internal static readonly Dictionary<string, AssetType> kFilters = new( System.StringComparer.OrdinalIgnoreCase)
 		{
-			{ "t:AnimationController", AssetType.kAnimationController },
-			{ "t:Animator", AssetType.kAnimationController },
+			{ "t:AnimationController", AssetType.AnimationController },
+			{ "t:Animator", AssetType.AnimationController },
 			
-			{ "t:AnimationClip", AssetType.kAnimationClip },
-			{ "t:Animation", AssetType.kAnimationClip },
+			{ "t:AnimationClip", AssetType.AnimationClip },
+			{ "t:Animation", AssetType.AnimationClip },
 			
-			{ "t:AudioClip", AssetType.kAudioClip },
-			{ "t:Audio", AssetType.kAudioClip },
+			{ "t:AudioClip", AssetType.AudioClip },
+			{ "t:Audio", AssetType.AudioClip },
 			
-			{ "t:AudioMixer", AssetType.kAudioMixer },
-			{ "t:Mixer", AssetType.kAudioMixer },
+			{ "t:AudioMixer", AssetType.AudioMixer },
+			{ "t:Mixer", AssetType.AudioMixer },
 			
-			{ "t:ComputeShader", AssetType.kComputeShader },
+			{ "t:ComputeShader", AssetType.ComputeShader },
 			
-			{ "t:Font", AssetType.kFont },
+			{ "t:Font", AssetType.Font },
 			
-			{ "t:GUISkin", AssetType.kGUISkin },
+			{ "t:GUISkin", AssetType.GUISkin },
 			
-			{ "t:Material", AssetType.kMaterial },
+			{ "t:Material", AssetType.Material },
 			
-			{ "t:Model", AssetType.kModel },
-		//	{ "t:Mesh", AssetType.kModel },
+			{ "t:Model", AssetType.Model },
+		//	{ "t:Mesh", AssetType.Model },
 			
-			{ "t:PhysicMaterial", AssetType.kPhysicMaterial },
+			{ "t:PhysicMaterial", AssetType.PhysicMaterial },
 			
-			{ "t:Prefab", AssetType.kPrefab },
+			{ "t:Prefab", AssetType.Prefab },
 			
-			{ "t:Scene", AssetType.kScene },
+			{ "t:Scene", AssetType.Scene },
 			
-			{ "t:Script", AssetType.kScript },
+			{ "t:Script", AssetType.Script },
 			
-			{ "t:ScriptableObject", AssetType.kScriptableObject },
-			{ "t:Asset", AssetType.kScriptableObject },
+			{ "t:ScriptableObject", AssetType.ScriptableObject },
+			{ "t:Asset", AssetType.ScriptableObject },
 			
-			{ "t:Shader", AssetType.kShader },
+			{ "t:Shader", AssetType.Shader },
 			
-			{ "t:TextAsset", AssetType.kTextAsset },
-			{ "t:Text", AssetType.kTextAsset },
+			{ "t:TextAsset", AssetType.TextAsset },
+			{ "t:Text", AssetType.TextAsset },
 			
-			{ "t:Texture", AssetType.kTexture },
+			{ "t:Texture", AssetType.Texture },
 			
-			{ "t:VideoClip", AssetType.kVideoClip },
-			{ "t:Video", AssetType.kVideoClip },
+			{ "t:VideoClip", AssetType.VideoClip },
+			{ "t:Video", AssetType.VideoClip },
 		};
 		public static readonly Dictionary<string, AssetType> kExtensions =
 			new Dictionary<string, AssetType>( System.StringComparer.OrdinalIgnoreCase)
 		{
 			/* kAnimationController */
-			{ ".controller", AssetType.kAnimationController },
+			{ ".controller", AssetType.AnimationController },
 			
 			/* kAnimationClip */
-			{ ".anim", AssetType.kAnimationClip },
+			{ ".anim", AssetType.AnimationClip },
 			
 			/* kAudioClip */
-			{ ".wav", AssetType.kAudioClip },
-			{ ".mp3", AssetType.kAudioClip },
-			{ ".ogg", AssetType.kAudioClip },
-			{ ".aif", AssetType.kAudioClip },
-			{ ".aiff", AssetType.kAudioClip },
-			{ ".xm", AssetType.kAudioClip },
-			{ ".mod", AssetType.kAudioClip },
-			{ ".it", AssetType.kAudioClip },
-			{ ".s3m", AssetType.kAudioClip },
+			{ ".wav", AssetType.AudioClip },
+			{ ".mp3", AssetType.AudioClip },
+			{ ".ogg", AssetType.AudioClip },
+			{ ".aif", AssetType.AudioClip },
+			{ ".aiff", AssetType.AudioClip },
+			{ ".xm", AssetType.AudioClip },
+			{ ".mod", AssetType.AudioClip },
+			{ ".it", AssetType.AudioClip },
+			{ ".s3m", AssetType.AudioClip },
 			
 			/* kAudioMixer */
-			{ ".mixer", AssetType.kAudioMixer },
+			{ ".mixer", AssetType.AudioMixer },
 			
 			/* kComputeShader */
-			{ ".compute", AssetType.kComputeShader },
+			{ ".compute", AssetType.ComputeShader },
 			
 			/* kCubemap */
-	//		{ ".hdr", AssetType.kCubemap },
-	//		{ ".cubemap", AssetType.kCubemap },
+	//		{ ".hdr", AssetType.Cubemap },
+	//		{ ".cubemap", AssetType.Cubemap },
 			
 			/* kFont */
-			{ ".ttf", AssetType.kFont },
-			{ ".otf", AssetType.kFont },
-			{ ".dfont", AssetType.kFont },
+			{ ".ttf", AssetType.Font },
+			{ ".otf", AssetType.Font },
+			{ ".dfont", AssetType.Font },
 			
 			/* kGUISkin */
-			{ ".guiskin", AssetType.kGUISkin },
+			{ ".guiskin", AssetType.GUISkin },
 			
 			/* kMaterial */
-			{ ".mat", AssetType.kMaterial },
-			{ ".material", AssetType.kMaterial },
+			{ ".mat", AssetType.Material },
+			{ ".material", AssetType.Material },
 			
 			/* kModel */
-			{ ".3ds", AssetType.kModel },
-			{ ".blend", AssetType.kModel },
-			{ ".blender", AssetType.kModel },
-			{ ".c3d", AssetType.kModel },
-			{ ".c4d", AssetType.kModel },
-			{ ".dae", AssetType.kModel },
-			{ ".dfx", AssetType.kModel },
-			{ ".fbx", AssetType.kModel },
-			{ ".obj", AssetType.kModel },
-			{ ".ma", AssetType.kModel },
-			{ ".mb", AssetType.kModel },
-			{ ".max", AssetType.kModel },
-			{ ".lxo", AssetType.kModel },
-			{ ".lwo", AssetType.kModel },
-			{ ".jas", AssetType.kModel },
-			{ ".skp", AssetType.kModel },
+			{ ".3ds", AssetType.Model },
+			{ ".blend", AssetType.Model },
+			{ ".blender", AssetType.Model },
+			{ ".c3d", AssetType.Model },
+			{ ".c4d", AssetType.Model },
+			{ ".dae", AssetType.Model },
+			{ ".dfx", AssetType.Model },
+			{ ".fbx", AssetType.Model },
+			{ ".obj", AssetType.Model },
+			{ ".ma", AssetType.Model },
+			{ ".mb", AssetType.Model },
+			{ ".max", AssetType.Model },
+			{ ".lxo", AssetType.Model },
+			{ ".lwo", AssetType.Model },
+			{ ".jas", AssetType.Model },
+			{ ".skp", AssetType.Model },
 			
 			/* kPhysicMaterial */
-			{ ".physicMaterial", AssetType.kPhysicMaterial },
-			{ ".physicsMaterial2D", AssetType.kPhysicMaterial },
+			{ ".physicMaterial", AssetType.PhysicMaterial },
+			{ ".physicsMaterial2D", AssetType.PhysicMaterial },
 			
 			/* kPrefab */
-			{ ".prefab", AssetType.kPrefab },
+			{ ".prefab", AssetType.Prefab },
 			
 			/* kScene */
-			{ ".unity", AssetType.kScene },
+			{ ".unity", AssetType.Scene },
 			
 			/* kScript */
-			{ ".cs", AssetType.kScript },
-			{ ".js", AssetType.kScript },
+			{ ".cs", AssetType.Script },
+			{ ".js", AssetType.Script },
 			
 			/* kScriptableObject */
-			{ ".asset", AssetType.kScriptableObject },
+			{ ".asset", AssetType.ScriptableObject },
 			
 			/* kShader */
-			{ ".shader", AssetType.kShader },
+			{ ".shader", AssetType.Shader },
 			
 			/* kTextAsset */
-			{ ".txt", AssetType.kTextAsset },
-			{ ".html", AssetType.kTextAsset },
-			{ ".htm", AssetType.kTextAsset },
-			{ ".xml", AssetType.kTextAsset },
-			{ ".bytes", AssetType.kTextAsset },
-			{ ".json", AssetType.kTextAsset },
-			{ ".csv", AssetType.kTextAsset },
-			{ ".yaml", AssetType.kTextAsset },
-			{ ".fnt", AssetType.kTextAsset },
+			{ ".txt", AssetType.TextAsset },
+			{ ".html", AssetType.TextAsset },
+			{ ".htm", AssetType.TextAsset },
+			{ ".xml", AssetType.TextAsset },
+			{ ".bytes", AssetType.TextAsset },
+			{ ".json", AssetType.TextAsset },
+			{ ".csv", AssetType.TextAsset },
+			{ ".yaml", AssetType.TextAsset },
+			{ ".fnt", AssetType.TextAsset },
 			
 			/* kTexture */
-			{ ".jpg", AssetType.kTexture },
-			{ ".jpeg", AssetType.kTexture },
-			{ ".tif", AssetType.kTexture },
-			{ ".tiff", AssetType.kTexture },
-			{ ".tga", AssetType.kTexture },
-			{ ".gif", AssetType.kTexture },
-			{ ".png", AssetType.kTexture },
-			{ ".psd", AssetType.kTexture },
-			{ ".bmp", AssetType.kTexture },
-			{ ".iff", AssetType.kTexture },
-			{ ".pict", AssetType.kTexture },
-			{ ".pic", AssetType.kTexture },
-			{ ".pct", AssetType.kTexture },
-			{ ".exr", AssetType.kTexture },
-			{ ".hdr", AssetType.kTexture },
-			{ ".cubemap", AssetType.kTexture },
+			{ ".jpg", AssetType.Texture },
+			{ ".jpeg", AssetType.Texture },
+			{ ".tif", AssetType.Texture },
+			{ ".tiff", AssetType.Texture },
+			{ ".tga", AssetType.Texture },
+			{ ".gif", AssetType.Texture },
+			{ ".png", AssetType.Texture },
+			{ ".psd", AssetType.Texture },
+			{ ".bmp", AssetType.Texture },
+			{ ".iff", AssetType.Texture },
+			{ ".pict", AssetType.Texture },
+			{ ".pic", AssetType.Texture },
+			{ ".pct", AssetType.Texture },
+			{ ".exr", AssetType.Texture },
+			{ ".hdr", AssetType.Texture },
+			{ ".cubemap", AssetType.Texture },
 			
 			/* kVideoClip */
-			{ ".mov", AssetType.kVideoClip },
-			{ ".mpg", AssetType.kVideoClip },
-			{ ".mpeg", AssetType.kVideoClip },
-			{ ".mp4", AssetType.kVideoClip },
-			{ ".avi", AssetType.kVideoClip },
-			{ ".asf", AssetType.kVideoClip },
+			{ ".mov", AssetType.VideoClip },
+			{ ".mpg", AssetType.VideoClip },
+			{ ".mpeg", AssetType.VideoClip },
+			{ ".mp4", AssetType.VideoClip },
+			{ ".avi", AssetType.VideoClip },
+			{ ".asf", AssetType.VideoClip },
 		};
 	}
 }

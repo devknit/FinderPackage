@@ -4,14 +4,14 @@ using System.Collections.Generic;
 
 namespace Finder
 {
-	public sealed class SearchFilter
+	internal sealed class SearchFilter
 	{
-		public bool Valid
+		internal bool Valid
 		{
 			get;
 			private set;
 		}
-		public void Change( string value)
+		internal void Change( string value)
 		{
 			Valid = false;
 			
@@ -73,7 +73,7 @@ namespace Finder
 			}
 			m_OnChangeCallback?.Invoke( Valid);
 		}
-		public bool Check( Element element)
+		internal bool Check( Element element)
 		{
 			if( Valid != false)
 			{
@@ -122,11 +122,11 @@ namespace Finder
 			}
 			return true;
 		}
-		public bool ContainsTypeValue( string value)
+		internal bool ContainsTypeValue( string value)
 		{
 			return m_Types.ContainsValue( value);
 		}
-		public void ToBuildStringNames( System.Text.StringBuilder builder)
+		internal void ToBuildStringNames( System.Text.StringBuilder builder)
 		{
 			foreach( var name in m_Names)
 			{
@@ -137,7 +137,7 @@ namespace Finder
 				builder.Append( name);
 			}
 		}
-		public void ToBuildStringPaths( System.Text.StringBuilder builder)
+		internal void ToBuildStringPaths( System.Text.StringBuilder builder)
 		{
 			foreach( var path in m_Paths)
 			{
@@ -156,7 +156,7 @@ namespace Finder
 				builder.Append( path.Key);
 			}
 		}
-		public void ToBuildStringTypes( System.Text.StringBuilder builder)
+		internal void ToBuildStringTypes( System.Text.StringBuilder builder)
 		{
 			foreach( var type in m_Types.Values)
 			{
@@ -168,7 +168,7 @@ namespace Finder
 				builder.Append( type);
 			}
 		}
-		public SearchFilter( Action<bool> onFilterChange=null)
+		internal SearchFilter( Action<bool> onFilterChange=null)
 		{
 			m_Names = new List<string>();
 			m_Paths = new Dictionary<string, int>();
@@ -178,6 +178,6 @@ namespace Finder
         readonly List<string> m_Names;
 		readonly Dictionary<string, int> m_Paths;
 		readonly Dictionary<AssetType, string> m_Types;
-		Action<bool> m_OnChangeCallback;
+        readonly Action<bool> m_OnChangeCallback;
 	}
 }
