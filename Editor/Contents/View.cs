@@ -12,32 +12,35 @@ namespace Finder
 {
 	public enum ClickType
 	{
-		kNone,
-		kPing,
-		kPingFileOnly,
-		kActive,
-		kActiveFileOnly
+		None,
+		Ping,
+		PingFileOnly,
+		Active,
+		ActiveFileOnly
 	}
 	public sealed class View : TreeView
 	{
 		public enum Type
 		{
-			kTree,
-			kList
+			Tree,
+			List
 		}
 		public enum Column
 		{
-			kNone = 0x00,
-			kName = 0x01,
-			kExtension = 0x02,
-			kPath = 0x04,
-			kGuid = 0x08,
-			kMissing = 0x10,
-			kReference = 0x20,
-			kDefault = kName | kExtension,
-			kAll = kName | kExtension | kPath | kGuid | kMissing | kReference
+			None = 0x00,
+			Name = 0x01,
+			Extension = 0x02,
+			Path = 0x04,
+			Guid = 0x08,
+			Missing = 0x10,
+			Reference = 0x20,
+			
+			Project = Name,
+			Select = Name | Extension | Missing,
+			Dependent = Name | Missing | Reference,
+			All = Name | Extension | Path | Guid | Missing | Reference
 		}
-		public static MultiColumnHeaderState CreateHeaderState( Column columnMask=Column.kNone)
+		public static MultiColumnHeaderState CreateHeaderState( Column columnMask=Column.None)
 		{
 			var columns = new []
 			{
@@ -104,11 +107,11 @@ namespace Finder
 			};
 			var headerState = new MultiColumnHeaderState( columns);
 			
-			if( columnMask != Column.kNone)
+			if( columnMask != Column.None)
 			{
 				var visibleColumns = new List<int>();
 				
-				for( int i0 = 0, mask = 1; mask < (int)Column.kAll; ++i0, mask <<= 1)
+				for( int i0 = 0, mask = 1; mask < (int)Column.All; ++i0, mask <<= 1)
 				{
 					if( ((int)columnMask & mask) != 0)
 					{
@@ -142,9 +145,9 @@ namespace Finder
 							extendElement = extendElement.ParentElement;
 						}
 					}
-					if( m_ClickType <= ClickType.kPingFileOnly)
+					if( m_ClickType <= ClickType.PingFileOnly)
 					{
-						element.PingObject( m_ClickType == ClickType.kPing);
+						element.PingObject( m_ClickType == ClickType.Ping);
 					}
 				}
 				var visibleRows = GetRows();
@@ -166,7 +169,7 @@ namespace Finder
 		{
 			switch( viewType)
 			{
-				case Type.kTree:
+				case Type.Tree:
 				{
 					m_PreBuildRows = PreBuildRows;
 					m_BuildRows = BuildTreeRows;
@@ -174,7 +177,7 @@ namespace Finder
 					m_BuildFilterRows = BuildTreeFilterRows;
 					break;
 				}
-				case Type.kList:
+				case Type.List:
 				{
 					m_PreBuildRows = PreBuildRows;
 					m_BuildRows = BuildListRows;
@@ -202,7 +205,7 @@ namespace Finder
 		{
 			var visibleColumns = multiColumnHeader.state.visibleColumns.ToList();
 			
-			for( int i0 = 0, mask = 1; mask < (int)Column.kAll; ++i0, mask <<= 1)
+			for( int i0 = 0, mask = 1; mask < (int)Column.All; ++i0, mask <<= 1)
 			{
 				if( ((int)column & mask) != 0)
 				{
@@ -324,7 +327,7 @@ namespace Finder
 		}
 		protected override void SelectionChanged( IList<int> selectedIds)
 		{
-			if( m_ClickType >= ClickType.kActive)
+			if( m_ClickType >= ClickType.Active)
 			{
 				var newSelections = GetRows().Where( (x) =>
 				{
@@ -332,7 +335,7 @@ namespace Finder
 					{
 						if( selectedIds.Contains( element.id) != false)
 						{
-							if( m_ClickType == ClickType.kActiveFileOnly)
+							if( m_ClickType == ClickType.ActiveFileOnly)
 							{
 								return element.IsFile();
 							}
@@ -392,27 +395,27 @@ namespace Finder
 					}
 					switch( (Column)(1 << columnIndex))
 					{
-						case Column.kName:
+						case Column.Name:
 						{
 							base.RowGUI( args);
 							break;
 						}
-						case Column.kExtension:
+						case Column.Extension:
 						{
 							DefaultGUI.Label( cellRect, element.Extension, args.selected, args.focused);
 							break;
 						}
-						case Column.kPath:
+						case Column.Path:
 						{
 							DefaultGUI.Label( cellRect, element.Path, args.selected, args.focused);
 							break;
 						}
-						case Column.kGuid:
+						case Column.Guid:
 						{
 							DefaultGUI.Label( cellRect, element.Guid, args.selected, args.focused);
 							break;
 						}
-						case Column.kMissing:
+						case Column.Missing:
 						{
 							if( element.Missing >= 0)
 							{
@@ -420,7 +423,7 @@ namespace Finder
 							}
 							break;
 						}
-						case Column.kReference:
+						case Column.Reference:
 						{
 							if( element.Reference >= 0)
 							{

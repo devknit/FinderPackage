@@ -12,7 +12,7 @@ namespace Finder
 	[System.Serializable]
 	public sealed class Explorer : ISerializationCallbackReceiver
 	{
-		public Explorer( List<Element> elements, View.Column columnMask=View.Column.kDefault) 
+		public Explorer( List<Element> elements, View.Column columnMask) 
 		{
 			m_HeaderState = View.CreateHeaderState( columnMask);
 			m_ViewState = new TreeViewState();
@@ -70,13 +70,13 @@ namespace Finder
 		public void Apply( List<Element> src)
 		{
 			m_Elements = src;
-			m_View.Apply( m_Elements, View.Type.kTree);
+			m_View.Apply( m_Elements, View.Type.Tree);
 		}
 		public void Apply()
 		{
 			if( m_Elements != null)
 			{
-				m_View.Apply( m_Elements, View.Type.kTree);
+				m_View.Apply( m_Elements, View.Type.Tree);
 			}
 		}
 		public void ExpandAll()
@@ -128,23 +128,23 @@ namespace Finder
 				#if false
 					int mouseButton;
 					
-					mouseButton = GUIExpansion.Toggle( m_ViewType == View.Type.kTree, 
+					mouseButton = GUIExpansion.Toggle( m_ViewType == View.Type.Tree, 
 						new GUIContent( EditorGUIUtility.Load( m_TreeTexture) as Texture2D),
 						EditorStyles.toolbarButton, GUILayout.ExpandWidth( false));
 					switch( mouseButton)
 					{
 						case 0:
 						{
-							if( m_ViewType != View.Type.kTree)
+							if( m_ViewType != View.Type.Tree)
 							{
-								m_ViewType = View.Type.kTree;
+								m_ViewType = View.Type.Tree;
 								Apply();
 							}
 							break;
 						}
 						case 1:
 						{
-							if( m_ViewType == View.Type.kTree)
+							if( m_ViewType == View.Type.Tree)
 							{
 								var contextMenu = new GenericMenu();
 								
@@ -161,23 +161,23 @@ namespace Finder
 							break;
 						}
 					}
-					mouseButton = GUIExpansion.Toggle( m_ViewType == View.Type.kList, 
+					mouseButton = GUIExpansion.Toggle( m_ViewType == View.Type.List, 
 						new GUIContent( AssetDatabase.LoadMainAssetAtPath( m_ListTexture) as Texture2D),
 						EditorStyles.toolbarButton, GUILayout.ExpandWidth( false));
 					switch( mouseButton)
 					{
 						case 0:
 						{
-							if( m_ViewType != View.Type.kList)
+							if( m_ViewType != View.Type.List)
 							{
-								m_ViewType = View.Type.kList;
+								m_ViewType = View.Type.List;
 								Apply();
 							}
 							break;
 						}
 						case 1:
 						{
-							if( m_ViewType == View.Type.kList)
+							if( m_ViewType == View.Type.List)
 							{
 							}
 							break;
@@ -186,7 +186,7 @@ namespace Finder
 					GUILayout.Space( 6);
 				#endif
 				#if false
-					if( m_ViewType == View.Type.kList)
+					if( m_ViewType == View.Type.List)
 					{
 						EditorGUI.BeginDisabledGroup( true);
 						EditorGUILayout.TextField( "Asssets/", EditorStyles.toolbarTextField);
@@ -326,22 +326,22 @@ namespace Finder
 						contextMenu.AddItem( new GUIContent( "Select To Dependencies/New Window"), false, () =>
 						{
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
-							contents?.OpenSearchAssets( elements, SearchType.TraceDependents);
+							contents?.OpenFindAssets( elements, FindReference.Mode.ToDependencies);
 						});
 						contextMenu.AddItem( new GUIContent( "Select To Dependencies/Current Window"), false, () =>
 						{
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
-							contents?.SearchAssets( elements, SearchType.TraceDependents);
+							contents?.FindAssets( elements, FindReference.Mode.ToDependencies);
 						});
 						contextMenu.AddItem( new GUIContent( "Select From Dependencies/New Window"), false, () =>
 						{
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
-							contents?.OpenSearchAssets( elements, SearchType.TracePrecedents);
+							contents?.OpenFindAssets( elements, FindReference.Mode.FromDependencies);
 						});
 						contextMenu.AddItem( new GUIContent( "Select From Dependencies/Current Window"), false, () =>
 						{
 							var elements = m_View.SelectSelectedElements( x => x.Guid);
-							contents?.SearchAssets( elements, SearchType.TracePrecedents);
+							contents?.FindAssets( elements, FindReference.Mode.FromDependencies);
 						});
 					#if false
 						if( m_View.ContainsSeelctedElements( AssetType.kMaterial, x => x.AssetType) != false)
@@ -444,21 +444,22 @@ namespace Finder
 			m_Elements = rootElement.ChildElements;
 		}
 		[SerializeField]
-		TreeViewState m_ViewState;
+        TreeViewState m_ViewState;
 		[SerializeField]
 		MultiColumnHeaderState m_HeaderState;
 		[SerializeField]
-		SerializableElementRoot m_SerializableElement;
+        SerializableElementRoot m_SerializableElement;
 		// [SerializeField]
 		// View.Type m_ViewType;
 		[SerializeField]
 		string m_SearchString;
-		[System.NonSerialized]
-		List<Element> m_Elements;
+		
 		[System.NonSerialized]
 		SearchField m_SearchField;
 		[System.NonSerialized]
 		SearchFilter m_SearchFilter;
+		[System.NonSerialized]
+		List<Element> m_Elements;
 		[System.NonSerialized]
 		View m_View;
 		[System.NonSerialized]

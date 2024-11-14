@@ -4,146 +4,94 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
+using UnityEditor.Animations;
 
 namespace Finder
 {
-	public sealed class Search
+	public sealed class FindReference
 	{
-		public static void TracePrecedents( 
-			IEnumerable<string> traceGuids, bool recursive,
-			out Dictionary<string, ElementSource> traces,
-			out Dictionary<string, ElementSource> founds)
+		public enum Mode
 		{
-			var traceAssets = new Dictionary<string, string>();
-			string[] assetPaths;
-			string targetGuid;
-			string targetPath;
-			string tracePath;
-			
-			founds = new Dictionary<string, ElementSource>();
-			traces = new Dictionary<string, ElementSource>();
-			
-			if( OnProgress( "Trace Precedents", 0) != false)
-			{
-				OnFinish();
-				return;
-			}
-			foreach( string traceGuid in traceGuids)
-			{
-				tracePath = AssetDatabase.GUIDToAssetPath( traceGuid);
-				if( string.IsNullOrEmpty( tracePath) == false
-				&&	AssetDatabase.IsValidFolder( tracePath) == false)
-				{
-					traceAssets.Add( tracePath, traceGuid);
-					traces.Add( tracePath, new ElementSource( tracePath, 0, -1));
-					
-					if( CheckMissing( tracePath, traces, 0) == false)
-					{
-						OnFinish();
-						return;
-					}
-				}
-			}
-			if( traceAssets.Count > 0)
-			{
-				string[] targetGuids = AssetDatabase.FindAssets( 
-					"t:Scene t:Prefab t:Material t:AnimatorController t:ScriptableObject");
-				string traceGuid;
-				
-				for( int i0 = 0; i0 < targetGuids.Length; ++i0)
-				{
-					targetGuid = targetGuids[ i0];
-					targetPath = AssetDatabase.GUIDToAssetPath( targetGuid);
-					
-					if( i0 % 3 == 2)
-					{
-						if( OnProgress( "Trace Precedents", targetPath, i0 / (float)targetGuids.Length) != false)
-						{
-							OnFinish();
-							return;
-						}
-					}
-					if( founds.ContainsKey( targetPath) == false)
-					{
-						assetPaths = AssetDatabase.GetDependencies( targetPath, recursive);
-						
-						for( int i1 = 0; i1 < assetPaths.Length; ++i1)
-						{
-							tracePath = assetPaths[ i1];
-							
-							if( traceAssets.TryGetValue( tracePath, out traceGuid) != false)
-							{
-								if( traceGuid != targetGuid)
-								{
-									if( founds.ContainsKey( targetPath) == false)
-									{
-										founds.Add( targetPath, new ElementSource( targetPath, -1, -1));
-									}
-									traces[ tracePath].Reference++;
-								}
-							}
-						}
-					}
-				}
-			}
-			OnProgress( "Trace Precedents", 1);
-			OnFinish();
+			None,
+			ToDependencies,
+			FromDependencies,
 		}
-		public static void TraceDependents( 
-			IEnumerable<string> traceGuids, bool recursive,
-			out Dictionary<string, ElementSource> traces,
-			out Dictionary<string, ElementSource> founds)
+		public static void Execute( Mode mode,
+			IEnumerable<string> targetGuids, bool recursive,
+			out Dictionary<string, ElementSource> targets,
+			out Dictionary<string, ElementSource> results)
 		{
-			int traceGuidCount = traceGuids.Count();
-			float unitProgress = 1.0f / traceGuidCount;
-			float progress;
-			string[] assetPaths;
-			string targetPath;
-			string targetGuid;
-			string tracePath;
+			switch( mode)
+			{
+				case Mode.ToDependencies:
+				{
+					ToDependencies( targetGuids, recursive, out targets, out results);
+					break;
+				}
+				case Mode.FromDependencies:
+				{
+					FromDependencies( targetGuids, recursive, out targets, out results);
+					break;
+				}
+				default:
+				{
+					targets = new Dictionary<string, ElementSource>();
+					results = new Dictionary<string, ElementSource>();
+					break;
+				}
+			}
+		}
+		public static void ToDependencies( 
+			IEnumerable<string> targetGuids, bool recursive,
+			out Dictionary<string, ElementSource> targets,
+			out Dictionary<string, ElementSource> results)
+		{
+			int targetGuidCount = targetGuids.Count();
+			float unitProgress = 1.0f / targetGuidCount;
 			int i0 = 0, i1;
 			
-			founds = new Dictionary<string, ElementSource>();
-			traces = new Dictionary<string, ElementSource>();
+			results = new Dictionary<string, ElementSource>();
+			targets = new Dictionary<string, ElementSource>();
 			
-			if( OnProgress( "Trace Dependents", 0) != false)
+			if( OnProgress( "Find To Dependencies", 0) != false)
 			{
 				OnFinish();
 				return;
 			}
-			foreach( string traceGuid in traceGuids)
+			foreach( string targetGuid in targetGuids)
 			{
-				tracePath = AssetDatabase.GUIDToAssetPath( traceGuid);
+				string targetPath = AssetDatabase.GUIDToAssetPath( targetGuid);
 				
-				if( string.IsNullOrEmpty( tracePath) == false
-				&&	AssetDatabase.IsValidFolder( tracePath) == false)
+				if( string.IsNullOrEmpty( targetPath) == false
+				&&	AssetDatabase.IsValidFolder( targetPath) == false)
 				{
-					if( traces.ContainsKey( tracePath) == false)
+					if( targets.ContainsKey( targetPath) == false)
 					{
-						assetPaths = AssetDatabase.GetDependencies( tracePath, recursive);
-						traces.Add( tracePath, new ElementSource( tracePath, assetPaths.Length, -1));
+						string[] assetPaths = AssetDatabase.GetDependencies( targetPath, recursive);
+						targets.Add( targetPath, new ElementSource( targetPath, assetPaths.Length, -1));
 						
 						for( i1 = 0; i1 < assetPaths.Length; ++i1)
 						{
-							progress = i1 / (float)assetPaths.Length;
-							progress /= traceGuidCount;
+							float progress = i1 / (float)assetPaths.Length;
+							progress /= targetGuidCount;
 							progress += i0 * unitProgress;
-							targetPath = assetPaths[ i1];
 							
-							if( OnProgress( "Trace Dependents", targetPath, progress) != false)
+							string assetPath = assetPaths[ i1];
+							
+							if( OnProgress( "Find To Dependencies", assetPath, progress) != false)
 							{
 								OnFinish();
 								return;
 							}
-							if( founds.ContainsKey( targetPath) == false)
+							if( results.ContainsKey( assetPath) == false)
 							{
-								targetGuid = AssetDatabase.AssetPathToGUID( targetPath);
+								string assetGuid = AssetDatabase.AssetPathToGUID( assetPath);
 								
-								if( traceGuid != targetGuid)
+								if( targetGuid != assetGuid)
 								{
-									founds.Add( targetPath, new ElementSource( targetPath, -1, -1));
+									results.Add( assetPath, new ElementSource( assetPath, -1, -1));
 									
-									if( CheckMissing( targetPath, founds, progress) == false)
+									if( CheckMissing( assetPath, results, progress) == false)
 									{
 										OnFinish();
 										return;
@@ -151,7 +99,7 @@ namespace Finder
 								}
 							}
 						}
-						if( CheckMissing( tracePath, traces, i0 * unitProgress) == false)
+						if( CheckMissing( targetPath, targets, i0 * unitProgress) == false)
 						{
 							OnFinish();
 							return;
@@ -160,7 +108,86 @@ namespace Finder
 				}
 				++i0;
 			}
-			OnProgress( "Trace Dependents", 1);
+			OnProgress( "Find To Dependencies", 1);
+			OnFinish();
+		}
+		public static void FromDependencies( 
+			IEnumerable<string> targetGuids, bool recursive,
+			out Dictionary<string, ElementSource> targets,
+			out Dictionary<string, ElementSource> results)
+		{
+			results = new Dictionary<string, ElementSource>();
+			targets = new Dictionary<string, ElementSource>();
+			
+			if( OnProgress( "Find From Dependencies", 0) != false)
+			{
+				OnFinish();
+				return;
+			}
+			var targetAssets = new Dictionary<string, string>();
+			
+			foreach( string targetGuid in targetGuids)
+			{
+				string targetPath = AssetDatabase.GUIDToAssetPath( targetGuid);
+				
+				if( string.IsNullOrEmpty( targetPath) == false
+				&&	AssetDatabase.IsValidFolder( targetPath) == false)
+				{
+					targetAssets.Add( targetPath, targetGuid);
+					targets.Add( targetPath, new ElementSource( targetPath, 0, -1));
+					
+					if( CheckMissing( targetPath, targets, 0) == false)
+					{
+						OnFinish();
+						return;
+					}
+				}
+			}
+			if( targetAssets.Count > 0)
+			{
+				string[] fromGuids = AssetDatabase.FindAssets( 
+					"t:Scene t:Prefab t:Material t:AnimatorController t:ScriptableObject");
+				
+				for( int i0 = 0; i0 < fromGuids.Length; ++i0)
+				{
+					string fromGuid = fromGuids[ i0];
+					string fromPath = AssetDatabase.GUIDToAssetPath( fromGuid);
+					
+					if( i0 % 3 == 2)
+					{
+						if( OnProgress( "Find From Dependencies", fromPath, i0 / (float)fromGuids.Length) != false)
+						{
+							OnFinish();
+							return;
+						}
+					}
+					if( results.ContainsKey( fromPath) == false)
+					{
+						string[] assetPaths = AssetDatabase.GetDependencies( fromPath, recursive);
+						
+						for( int i1 = 0; i1 < assetPaths.Length; ++i1)
+						{
+							string assetPath = assetPaths[ i1];
+							
+							if( targetAssets.TryGetValue( assetPath, out string targetGuid) != false)
+							{
+								if( targetGuid != fromGuid)
+								{
+									if( results.ContainsKey( fromPath) == false)
+									{
+										results.Add( fromPath, new ElementSource( fromPath, -1, -1));
+									}
+									if( targets.TryGetValue( assetPath, out var target) != false)
+									{
+										++target.Reference;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			OnProgress( "Find From Dependencies", 1);
 			OnFinish();
 		}
 		static bool CheckMissing( string targetPath, Dictionary<string, ElementSource> elements, float progress)
@@ -176,6 +203,7 @@ namespace Finder
 				if( typeof( Material).Equals( assetType) != false
 				||	typeof( GameObject).Equals( assetType) != false
 				||	typeof( AnimationClip).Equals( assetType) != false
+				||	typeof( AnimatorController).Equals( assetType) != false
 				||	typeof( LightingDataAsset).Equals( assetType) != false
 				||	typeof( ScriptableObject).IsAssignableFrom( assetType) != false)
 				{

@@ -7,12 +7,6 @@ using System.Collections.Generic;
 
 namespace Finder
 {
-	public enum SearchType
-	{
-		None,
-		TraceDependents,
-		TracePrecedents,
-	}
 	[System.Serializable]
 	public sealed class Contents
 	{
@@ -26,15 +20,15 @@ namespace Finder
 				m_Project.OnEnable( m_ClickType);
 				m_Project.ColumnHeaderResizeToFit();
 			}
-			if( m_Target != null)
+			if( m_Select != null)
 			{
-				m_Target.OnEnable( m_ClickType);
-				m_Target.ColumnHeaderResizeToFit();
+				m_Select.OnEnable( m_ClickType);
+				m_Select.ColumnHeaderResizeToFit();
 			}
-			if( m_Search != null)
+			if( m_Dependent != null)
 			{
-				m_Search.OnEnable( m_ClickType);
-				m_Search.ColumnHeaderResizeToFit();
+				m_Dependent.OnEnable( m_ClickType);
+				m_Dependent.ColumnHeaderResizeToFit();
 			}
 		}
 		public void OnDisable()
@@ -43,18 +37,18 @@ namespace Finder
 			{
 				m_Project.OnDisable();
 			}
-			if( m_Target != null)
+			if( m_Select != null)
 			{
-				m_Target.OnDisable();
+				m_Select.OnDisable();
 			}
-			if( m_Search != null)
+			if( m_Dependent != null)
 			{
-				m_Search.OnDisable();
+				m_Dependent.OnDisable();
 			}
 		}
 		public void OnToolbarGUI()
 		{
-			if( m_SearchType != SearchType.None)
+			if( m_FindMode != FindReference.Mode.None)
 			{
 				Rect searchTypeRect = EditorGUILayout.GetControlRect( GUILayout.Width( 160), GUILayout.Height( 17));
 				
@@ -72,21 +66,21 @@ namespace Finder
 				{
 					var menu = new GenericMenu();
 					
-					menu.AddItem(new GUIContent( kSearchTypes[ 1]), false, () =>
+					menu.AddItem( new GUIContent( FindReference.Mode.ToDependencies.ToString()), false, () =>
 					{
-						m_SearchType = SearchType.TraceDependents;
-						ResearchAssets();
+						m_FindMode = FindReference.Mode.ToDependencies;
+						RefindAssets();
 					});
-					menu.AddItem(new GUIContent( kSearchTypes[ 2]), false, () =>
+					menu.AddItem( new GUIContent( FindReference.Mode.FromDependencies.ToString()), false, () =>
 					{
-						m_SearchType = SearchType.TracePrecedents;
-						ResearchAssets();
+						m_FindMode = FindReference.Mode.FromDependencies;
+						RefindAssets();
 					});
 					menu.DropDown( buttonRect);
 				}
-				else if( GUI.Button( buttonRect, new GUIContent( kSearchTypes[ (int)m_SearchType]), toolbarDropDownToggleRight))
+				else if( GUI.Button( buttonRect, new GUIContent( m_FindMode.ToString()), toolbarDropDownToggleRight))
 				{
-					ResearchAssets();
+					RefindAssets();
 				}
 				using( new EditorGUILayout.HorizontalScope( EditorStyles.toolbar))
 				{
@@ -95,7 +89,7 @@ namespace Finder
 					if( m_Recursive != newRecursive)
 					{
 						m_Recursive = newRecursive;
-						ResearchAssets();
+						RefindAssets();
 					}
 				}
 			}
@@ -108,13 +102,13 @@ namespace Finder
 				{
 					m_Project.SetClickType( newClickType);
 				}
-				if( m_Target != null)
+				if( m_Select != null)
 				{
-					m_Target.SetClickType( newClickType);
+					m_Select.SetClickType( newClickType);
 				}
-				if( m_Search != null)
+				if( m_Dependent != null)
 				{
-					m_Search.SetClickType( newClickType);
+					m_Dependent.SetClickType( newClickType);
 				}
 				m_ClickType = newClickType;
 			}
@@ -127,7 +121,7 @@ namespace Finder
 		{
 			if( m_Project == null)
 			{
-				m_Project = new Explorer( GetAllAssetElements(), View.Column.kName);
+				m_Project = new Explorer( GetAllAssetElements(), View.Column.Project);
 				m_Project.OnEnable( m_ClickType);
 				m_Project.ColumnHeaderResizeToFit();
 			}
@@ -138,25 +132,25 @@ namespace Finder
 			m_ChangeProject = false;
 			m_Project.OnGUI( this);
 		}
-		public void OnTargetGUI()
+		public void OnSelectGUI()
 		{
-			if( m_Target == null)
+			if( m_Select == null)
 			{
-				m_Target = new Explorer( new List<Element>(), View.Column.kName | View.Column.kReference | View.Column.kMissing);
-				m_Target.OnEnable( m_ClickType);
-				m_Target.ColumnHeaderResizeToFit();
+				m_Select = new Explorer( new List<Element>(), View.Column.Select);
+				m_Select.OnEnable( m_ClickType);
+				m_Select.ColumnHeaderResizeToFit();
 			}
-			m_Target.OnGUI( this);
+			m_Select.OnGUI( this);
 		}
-		public void OnSearchGUI()
+		public void OnDependentGUI()
 		{
-			if( m_Search == null)
+			if( m_Dependent == null)
 			{
-				m_Search = new Explorer( new List<Element>(), View.Column.kDefault);
-				m_Search.OnEnable( m_ClickType);
-				m_Search.ColumnHeaderResizeToFit();
+				m_Dependent = new Explorer( new List<Element>(), View.Column.Dependent);
+				m_Dependent.OnEnable( m_ClickType);
+				m_Dependent.ColumnHeaderResizeToFit();
 			}
-			m_Search.OnGUI( this);
+			m_Dependent.OnGUI( this);
 		}
 		List<Element> GetAllAssetElements()
 		{
@@ -176,74 +170,55 @@ namespace Finder
 			EditorUtility.ClearProgressBar();
 			return builder.ToList();
 		}
-		public void OpenSearchAssets( IEnumerable<string> assetGuids, SearchType newSearchType)
+		public void OpenFindAssets( IEnumerable<string> assetGuids, FindReference.Mode newFindType)
 		{
 			Contents contents = m_OnCreateWindowContens?.Invoke();
-			if( contents != null)
-			{
-				contents.SearchAssets( assetGuids, newSearchType);
-			}
-			
+			contents?.FindAssets( assetGuids, newFindType);
 		}
-		public void SearchAssets( IEnumerable<string> assetGuids, SearchType newSearchType)
+		public void FindAssets( IEnumerable<string> assetGuids, FindReference.Mode newFindType)
 		{
-			Dictionary<string, ElementSource> targets;
-			Dictionary<string, ElementSource> searches;
-			ElementBuilder builder;
+			FindReference.Execute( 
+				newFindType, assetGuids, m_Recursive, 
+				out Dictionary<string, ElementSource> targets, 
+				out Dictionary<string, ElementSource> results);
+			var builder = new ElementBuilder();
 			
-			switch( newSearchType)
+			foreach( var result in results)
 			{
-				case SearchType.TracePrecedents:
-				{
-					Search.TracePrecedents( assetGuids, m_Recursive, out targets, out searches);
-					break;
-				}
-				case SearchType.TraceDependents:
-				{
-					Search.TraceDependents( assetGuids, m_Recursive, out targets, out searches);
-					break;
-				}
-				default:
-				{
-					return;
-				}
+				builder.Append( result.Value);
 			}
-			builder = new ElementBuilder();
-			foreach( var found in searches)
+			if( m_Dependent == null)
 			{
-				builder.Append( found.Value);
+				m_Dependent = new Explorer( new List<Element>(), View.Column.Dependent);
+				m_Dependent.OnEnable( m_ClickType);
+				m_Dependent.ColumnHeaderResizeToFit();
 			}
-			if( m_Search == null)
-			{
-				m_Search = new Explorer( new List<Element>(), View.Column.kDefault);
-				m_Search.OnEnable( m_ClickType);
-				m_Search.ColumnHeaderResizeToFit();
-			}
-			m_Search.Apply( builder.ToList());
-			m_Search.ExpandAll();
+			m_Dependent.Apply( builder.ToList());
+			m_Dependent.ExpandAll();
 			
 			builder = new ElementBuilder();
-			foreach( var trace in targets)
-			{
-				builder.Append( trace.Value);
-			}
-			if( m_Target == null)
-			{
-				m_Target = new Explorer( new List<Element>(), View.Column.kName | View.Column.kReference | View.Column.kMissing);
-				m_Target.OnEnable( m_ClickType);
-				m_Target.ColumnHeaderResizeToFit();
-			}
-			m_Target.Apply( builder.ToList());
-			m_Target.ExpandAll();
 			
-			m_TargetGuids = assetGuids.ToArray();
-			m_SearchType = newSearchType;
-		}
-		public bool ResearchAssets()
-		{
-			if( m_TargetGuids != null && m_SearchType != SearchType.None)
+			foreach( var target in targets)
 			{
-				SearchAssets( m_TargetGuids, m_SearchType);
+				builder.Append( target.Value);
+			}
+			if( m_Select == null)
+			{
+				m_Select = new Explorer( new List<Element>(), View.Column.Select);
+				m_Select.OnEnable( m_ClickType);
+				m_Select.ColumnHeaderResizeToFit();
+			}
+			m_Select.Apply( builder.ToList());
+			m_Select.ExpandAll();
+			
+			m_SelectGuids = assetGuids.ToArray();
+			m_FindMode = newFindType;
+		}
+		public bool RefindAssets()
+		{
+			if( m_SelectGuids != null && m_FindMode != FindReference.Mode.None)
+			{
+				FindAssets( m_SelectGuids, m_FindMode);
 				return true;
 			}
 			return false;
@@ -254,26 +229,22 @@ namespace Finder
 			"Ping", "Ping - file only", 
 			"Active", "Active - file only"
 		};
-		static readonly string[] kSearchTypes = new []
-		{
-			"", "To Dependencies", "From Dependencies"
-		};
 		[SerializeField]
 		Explorer m_Project;
 		[SerializeField]
-		Explorer m_Search;
+		Explorer m_Select;
 		[SerializeField]
-		Explorer m_Target;
+		Explorer m_Dependent;
 		[SerializeField]
 		bool m_ChangeProject;
 		[SerializeField]
 		bool m_Recursive;
 		[SerializeField]
-		SearchType m_SearchType;
+		FindReference.Mode m_FindMode;
 		[SerializeField]
-		string[] m_TargetGuids;
+		string[] m_SelectGuids;
 		[SerializeField]
-		ClickType m_ClickType = ClickType.kActiveFileOnly;
+		ClickType m_ClickType = ClickType.ActiveFileOnly;
 		
 		System.Func<Contents> m_OnCreateWindowContens;
 	}

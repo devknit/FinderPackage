@@ -33,28 +33,28 @@ namespace Finder
 			CreateNewWindow<Finder>( null).Show();
 		}
 		[MenuItem("Assets/Finder/Select To Dependencies &f", true, priority = 22)]
-		static bool IsTraceDependents()
+		static bool IsFindToDependencies()
 		{
 			return Selection.assetGUIDs?.Length > 0;
 		}
 		[MenuItem("Assets/Finder/Select To Dependencies &f", false, priority = 22)]
-		static void TraceDependents()
+		static void FindToDependencies()
 		{
 			var window = CreateNewWindow<Finder>( null);
 			window.Show();
-			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.TraceDependents);
+			window.m_Contents.FindAssets( Selection.assetGUIDs, FindReference.Mode.ToDependencies);
 		}
 		[MenuItem("Assets/Finder/Select From Dependencies", true, priority = 23)]
-		static bool IsTracePrecedents()
+		static bool IsFindFromDependencies()
 		{
 			return Selection.assetGUIDs?.Length > 0;
 		}
 		[MenuItem("Assets/Finder/Select From Dependencies", false, priority = 23)]
-		static void TracePrecedents()
+		static void FindFromDependencies()
 		{
 			var window = CreateNewWindow<Finder>( null);
 			window.Show();
-			window.m_Contents.SearchAssets( Selection.assetGUIDs, SearchType.TracePrecedents);
+			window.m_Contents.FindAssets( Selection.assetGUIDs, FindReference.Mode.FromDependencies);
 		}
 		public void AddItemsToMenu( GenericMenu menu)
 		{
@@ -131,7 +131,7 @@ namespace Finder
 					}
 					case KeyCode.F5:
 					{
-						if( m_Contents.ResearchAssets() != false)
+						if( m_Contents.RefindAssets() != false)
 						{
 							ev.Use();
 							Repaint();
@@ -160,20 +160,20 @@ namespace Finder
 			GUILayout.EndArea();
 		}
 		[SubWindow( "Select", SubWindowIcon.Project)]
-		void OnTargetGUI( Rect rect)
+		void OnSelectGUI( Rect rect)
 		{
 			GUILayout.BeginArea( rect);
 			{
-				m_Contents.OnTargetGUI();
+				m_Contents.OnSelectGUI();
 			}
 			GUILayout.EndArea();
 		}
 		[SubWindow( "Dependent", SubWindowIcon.Search)]
-		void OnSearchGUI( Rect rect)
+		void OnDependentGUI( Rect rect)
 		{
 			GUILayout.BeginArea( rect);
 			{
-				m_Contents.OnSearchGUI();
+				m_Contents.OnDependentGUI();
 			}
 			GUILayout.EndArea();
 		}

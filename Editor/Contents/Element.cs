@@ -30,20 +30,21 @@ namespace Finder
 		{
 			if( source is ElementComponentSource component)
 			{
-				var element = new Element();
-				element.id = component.Path.GetHashCode();
-				element.name = component.Name;
-				element.Extension = string.Empty;
-				element.Path = component.Path;
-				element.Guid = component.LocalId.ToString();
-				element.Directory = false;
-				element.Reference = component.Reference;
-				element.Missing = component.Missing;
-				element.AssetType = AssetType.kComponent;
-				element.LocalId = component.LocalId;
-				element.FindPath = component.FindPath;
-				
-				var content = EditorGUIUtility.ObjectContent( null, component.Type);
+                var element = new Element
+                {
+                    id = component.Path.GetHashCode(),
+                    name = component.Name,
+                    Extension = string.Empty,
+                    Path = component.Path,
+                    Guid = component.LocalId.ToString(),
+                    Directory = false,
+                    Reference = component.Reference,
+                    Missing = component.Missing,
+                    AssetType = AssetType.kComponent,
+                    LocalId = component.LocalId,
+                    FindPath = component.FindPath
+                };
+                var content = EditorGUIUtility.ObjectContent( null, component.Type);
 				element.icon = content.image as Texture2D;
 				
 				return element;
@@ -361,22 +362,22 @@ namespace Finder
 			if( targetObject != null)
 			{
 			#if WITH_SERIALIZE_LOCALFILEIDENTIFIER
-				if( cachedInspectorModeInfo == null)
+				if( s_CachedInspectorModeInfo == null)
 				{
-					cachedInspectorModeInfo = typeof( SerializedObject).GetProperty( 
+					s_CachedInspectorModeInfo = typeof( SerializedObject).GetProperty( 
 						"inspectorMode", BindingFlags.NonPublic | BindingFlags.Instance);
 				}
 				var serializedObject = new SerializedObject( targetObject);
-				cachedInspectorModeInfo.SetValue( serializedObject, InspectorMode.Debug, null);
+				s_CachedInspectorModeInfo.SetValue( serializedObject, InspectorMode.Debug, null);
 				SerializedProperty property = serializedObject.FindProperty( "m_LocalIdentfierInFile");
+				
 				if( property != null)
 				{
 					localId = property.longValue;
 					return localId != 0;
 				}
 			#else
-				string guid;
-				return AssetDatabase.TryGetGUIDAndLocalFileIdentifier( targetObject, out guid, out localId);
+				return AssetDatabase.TryGetGUIDAndLocalFileIdentifier( targetObject, out string guid, out localId);
 			#endif
 			}
 			localId = 0;
@@ -411,7 +412,7 @@ namespace Finder
 			return ret;
 		}
 	#if WITH_SERIALIZE_LOCALFILEIDENTIFIER
-		static PropertyInfo cachedInspectorModeInfo = null;
+		static PropertyInfo s_CachedInspectorModeInfo = null;
 	#endif
 		const HideFlags kNotHierarchy = HideFlags.NotEditable | HideFlags.HideAndDontSave;
 		static readonly string kComparePrefix = 
