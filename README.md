@@ -2,8 +2,6 @@
 
 Unity が管理しているアセットの依存関係を可視化する補助ツールのパッケージです。
 
----
-
 ## インストール方法
 
 Unity のドキュメント [Git URL からパッケージをインストールする](https://docs.unity3d.com/ja/current/Manual/upm-ui-giturl.html) の手順に従って以下のURLを指定してください
