@@ -380,7 +380,18 @@ namespace Finder
 			if( args.item is Element element)
 			{
 				int columnCount = args.GetNumVisibleColumns();
+				Color? contentColor = null;
 				
+				if( element.Missing == -2)
+				{
+					if( Event.current.type == EventType.Repaint)
+					{
+						DefaultStyles.label.Draw( args.rowRect, 
+							EditorGUIUtility.IconContent( "Warning"), isHover: false, isActive: false, args.selected, args.focused);
+					}
+					contentColor = GUI.contentColor;
+					GUI.contentColor = Color.yellow;
+				}
 				for( int i0 = 0; i0 < columnCount; ++i0)
 				{
 					var cellRect = args.GetCellRect( i0);
@@ -388,11 +399,6 @@ namespace Finder
 					
 					CenterRectUsingSingleLineHeight( ref cellRect);
 					
-					if( element.Missing == -2 && Event.current.type == EventType.Repaint)
-					{
-						DefaultStyles.label.Draw( args.rowRect, 
-							EditorGUIUtility.IconContent( "Warning"), isHover: false, isActive: false, args.selected, args.focused);
-					}
 					switch( (Column)(1 << columnIndex))
 					{
 						case Column.Name:
@@ -437,6 +443,10 @@ namespace Finder
 							break;
 						}
 					}
+				}
+				if( contentColor.HasValue != false)
+				{
+					GUI.contentColor = contentColor.Value;
 				}
 			}
 		}

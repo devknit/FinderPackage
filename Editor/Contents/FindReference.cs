@@ -83,19 +83,21 @@ namespace Finder
 								OnFinish();
 								return;
 							}
-							if( results.ContainsKey( assetPath) == false)
+							if( results.TryGetValue( assetPath, out ElementSource elementSource) == false)
 							{
 								string assetGuid = AssetDatabase.AssetPathToGUID( assetPath);
 								
-								if( targetGuid != assetGuid)
+								elementSource = new ElementSource( assetPath, 0, -1);
+								results.Add( assetPath, elementSource);
+								
+								if( CheckMissing( assetPath, results, progress) == false)
 								{
-									results.Add( assetPath, new ElementSource( assetPath, -1, -1));
-									
-									if( CheckMissing( assetPath, results, progress) == false)
-									{
-										OnFinish();
-										return;
-									}
+									OnFinish();
+									return;
+								}
+								if( elementSource != null)
+								{
+									++elementSource.Reference;
 								}
 							}
 						}
@@ -173,9 +175,14 @@ namespace Finder
 							{
 								if( targetGuid != fromGuid)
 								{
-									if( results.ContainsKey( fromPath) == false)
+									if( results.TryGetValue( fromPath, out ElementSource elementSource) == false)
 									{
-										results.Add( fromPath, new ElementSource( fromPath, -1, -1));
+										elementSource = new ElementSource( fromPath, 0, -1);
+										results.Add( fromPath, elementSource);
+									}
+									if( elementSource != null)
+									{
+										++elementSource.Reference;
 									}
 									if( targets.TryGetValue( assetPath, out var target) != false)
 									{
