@@ -36,7 +36,7 @@ namespace Finder
 			Reference = 0x20,
 			
 			Project = Name,
-			Select = Name | Extension | Missing,
+			Select = Name | Missing | Reference,
 			Dependent = Name | Missing | Reference,
 			All = Name | Extension | Path | Guid | Missing | Reference
 		}
