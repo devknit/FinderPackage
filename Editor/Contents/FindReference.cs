@@ -223,6 +223,10 @@ namespace Finder
 						{
 							continue;
 						}
+						if( asset.name == "Deprecated EditorExtensionImpl")
+						{
+							continue;
+						}
 						var serializedObject = new SerializedObject( asset);
 						SerializedProperty property = serializedObject.GetIterator();
 						
