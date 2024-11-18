@@ -66,19 +66,19 @@ namespace Finder
 				{
 					var menu = new GenericMenu();
 					
-					menu.AddItem( new GUIContent( FindReference.Mode.ToDependencies.ToString()), false, () =>
+					menu.AddItem( new GUIContent( ObjectNames.NicifyVariableName( FindReference.Mode.ToDependencies.ToString())), false, () =>
 					{
 						m_FindMode = FindReference.Mode.ToDependencies;
 						RefindAssets();
 					});
-					menu.AddItem( new GUIContent( FindReference.Mode.FromDependencies.ToString()), false, () =>
+					menu.AddItem( new GUIContent( ObjectNames.NicifyVariableName( FindReference.Mode.FromDependencies.ToString())), false, () =>
 					{
 						m_FindMode = FindReference.Mode.FromDependencies;
 						RefindAssets();
 					});
 					menu.DropDown( buttonRect);
 				}
-				else if( GUI.Button( buttonRect, new GUIContent( m_FindMode.ToString()), toolbarDropDownToggleRight))
+				else if( GUI.Button( buttonRect, new GUIContent( ObjectNames.NicifyVariableName( m_FindMode.ToString())), toolbarDropDownToggleRight))
 				{
 					RefindAssets();
 				}

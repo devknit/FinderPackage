@@ -1,50 +1,92 @@
 # Finder
 
-Unity が管理しているアセットを見つける補助ツールのパッケージです。
+Unity が管理しているアセットの依存関係を可視化する補助ツールのパッケージです。
 
 ---
 
-### インストール方法
+## インストール方法
 
-Windows の場合はコマンドプロンプト、Mac、Linux の場合はターミナルで  
-`git` のコマンドが実行可能な状態か確認してから行って下さい。
-
-パッケージをインストールしたい Unity プロジェクトの  
-Packages/manifest.json をテキストエディタで開きます。
-
-開いたら "dependencies" ノード内に以下を追加してください。
+Unity のドキュメント [Git URL からパッケージをインストールする](https://docs.unity3d.com/ja/current/Manual/upm-ui-giturl.html) の手順に従って以下のURLを指定してください
 
 ```
-"com.devknit.finder": "https://github.com/devknit/FinderPackage.git",
+https://github.com/devknit/FinderPackage.git
 ```
 
-![](Documentation/install.gif)
+## アップデート方法
 
-追加した状態を保存後、Unity にフォーカスを当てると
-パッケージのインストールが行われます。
+Unity のドキュメント [別のパッケージバージョンへの変更](https://docs.unity3d.com/ja/current/Manual/upm-ui-update.html) に従ってください
 
-インストールが正しく行わると `Projectウィンドウ` の `Packages` に  
-`Finder` が追加されていることが確認できます。
+## 使用方法
 
-![](Documentation/install.png)
+Unity の Project ウィンドウで任意のアセットを選択した状態から、右クリックでコンテキストメニューを開きます
 
----
+![](Documentation/Context.png)
 
-### 起動方法
+メニュー項目の中から `Finder` を選択、またはマウスオーバーをすると以下の項目が現れます
 
-Unity のメニューに Tools > Finder > Open から起動できます。
-ショートカットキーの　ALT + F でも起動することが可能です。
+- Select To Dependencies：Project ウィンドウで選択されているアセットが依存しているアセットを表示します
+- Select From Dependencies：Project ウィンドウで選択されているアセットに依存しているアセットを表示します
 
----
+![](Documentation/Window.png)
 
-### アップデート方法
+項目を選択すると上記のようなウィンドウが表示されます。
 
-パッケージがインストールされている Unity プロジェクトの
-Packages/manifest.json をテキストエディタで開きます。
+## ① 依存関係と更新
 
-開いたら "lock" ノード内にある "com.devknit.finder" を削除してください。
+Select で選択されているアセットに対して Dependent に表示されるアセットの依存関係の方向を示しています
 
-![](Documentation/update.gif)
+ボタンになっているため、クリックすることで結果を更新することが可能です
 
-削除した状態を保存後、Unity にフォーカスを当てると
-パッケージのアップデートが行われます。
+右側にある ▼ はドロップダウンメニューを表示し、依存関係を選択しなおすことが出来ます
+
+### To Dependencies
+
+Select で対象にしているアセットが依存している（子供の関係にある）アセットを表示します
+
+Recursive にチェック入っている場合は依存しているアセットがさらに依存している（孫、曾孫..）アセットまで検出するようになります
+
+### From Dependencies
+
+Select で対象にしているアセットに依存している（親の関係にある）アセットを表示します
+
+Recursive にチェック入っている場合は依存していたアセットがさらに依存していた（祖、曽祖）アセットまで検出するようになります
+
+## ② 依存関係の再帰性
+
+Recursive のチェックボックスを入れると対象を再帰的に検索するようになります
+
+動作は依存関係によって変化するため [To Dependencies](#to-dependencies)、[From Dependencies](#from-dependencies) を参照してください
+
+## ③ 選択された対象
+
+依存関係を調査する対象に選択されているアセットが表示されます
+
+検出された数は Reference の列に表示されます
+
+基本的にツリーに表示されるのはアセットとなりますが、アセットの中に Missing となる要素があった場合は、子要素に設定不備がある場所が追加されます
+
+設定不備は左端に警告アイコンが表示され、黄色の文字列でパスと型が表示されます
+
+また、不備が見つかった個数は Missing 列に表示されます
+
+## ④ 依存関係にあるアセット
+
+選択された対象と依存関係にあるアセットが表示されます。
+
+表示のフォーマットは [選択された対象](#-選択された対象) と同様です
+
+## ⑤ アセットが選択されたときの挙動
+
+アセットが選択された時の挙動をドロップダウン形式で選択することが出来ます
+
+選択可能な項目は以下になります
+
+- None：何もしません
+- Ping：対象のアセットが強調されます
+- Ping - file only：対象のファイルのみ強調表示されます
+- Active：対象のアセットが Project ウィンドウで選択されます
+- Active - file only：対象のファイルのみ Project ウィンドウで選択されます
+
+## ⑥ ウィンドウタブ
+
+各種タブの表示非表示を切り替えられます

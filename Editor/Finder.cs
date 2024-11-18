@@ -8,11 +8,6 @@ namespace Finder
 {
 	public sealed partial class Finder : MDIEditorWindow, IHasCustomMenu
 	{
-		[MenuItem( "Tools/Finder/Open", priority = 1)]
-		static void Open()
-		{
-			CreateNewWindow<Finder>( null).Show();
-		}
 		[MenuItem( "Tools/Finder/Closes", priority = 2)]
 		static void Closes()
 		{
@@ -27,11 +22,18 @@ namespace Finder
 				s_ActiveWindows = null;
 			}
 		}
+	#if false
+		[MenuItem( "Tools/Finder/Open", priority = 1)]
+		static void Open()
+		{
+			CreateNewWindow<Finder>( null).Show();
+		}
 		[MenuItem( "Assets/Finder/Open", priority = 21)]
 		static void OpenFinder()
 		{
 			CreateNewWindow<Finder>( null).Show();
 		}
+	#endif
 		[MenuItem("Assets/Finder/Select To Dependencies &f", true, priority = 22)]
 		static bool IsFindToDependencies()
 		{
