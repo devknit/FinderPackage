@@ -6,8 +6,20 @@ using MDI.Editor;
 
 namespace Finder
 {
-	public sealed partial class Finder : MDIEditorWindow, IHasCustomMenu
+	public sealed partial class AssetFinder : MDIEditorWindow, IHasCustomMenu
 	{
+	#if false
+		[MenuItem( "Tools/Finder/Open", priority = 1)]
+		static void Open()
+		{
+			CreateNewWindow<AssetFinder>( null).Show();
+		}
+		[MenuItem( "Assets/Finder/Open", priority = 21)]
+		static void OpenFinder()
+		{
+			CreateNewWindow<AssetFinder>( null).Show();
+		}
+	#endif
 		[MenuItem( "Tools/Finder/Closes", priority = 2)]
 		static void Closes()
 		{
@@ -22,18 +34,6 @@ namespace Finder
 				s_ActiveWindows = null;
 			}
 		}
-	#if false
-		[MenuItem( "Tools/Finder/Open", priority = 1)]
-		static void Open()
-		{
-			CreateNewWindow<Finder>( null).Show();
-		}
-		[MenuItem( "Assets/Finder/Open", priority = 21)]
-		static void OpenFinder()
-		{
-			CreateNewWindow<Finder>( null).Show();
-		}
-	#endif
 		[MenuItem("Assets/Finder/Select To Dependencies &f", true, priority = 22)]
 		static bool IsFindToDependencies()
 		{
@@ -42,7 +42,7 @@ namespace Finder
 		[MenuItem("Assets/Finder/Select To Dependencies &f", false, priority = 22)]
 		static void FindToDependencies()
 		{
-			var window = CreateNewWindow<Finder>( null);
+			var window = CreateNewWindow<AssetFinder>( null);
 			window.Show();
 			window.m_Contents.FindAssets( Selection.assetGUIDs, FindReference.Mode.ToDependencies);
 		}
@@ -54,7 +54,7 @@ namespace Finder
 		[MenuItem("Assets/Finder/Select From Dependencies", false, priority = 23)]
 		static void FindFromDependencies()
 		{
-			var window = CreateNewWindow<Finder>( null);
+			var window = CreateNewWindow<AssetFinder>( null);
 			window.Show();
 			window.m_Contents.FindAssets( Selection.assetGUIDs, FindReference.Mode.FromDependencies);
 		}
@@ -76,7 +76,7 @@ namespace Finder
 		{
 			if( s_ActiveWindows == null)
 			{
-				s_ActiveWindows = new List<Finder>();
+				s_ActiveWindows = new List<AssetFinder>();
 			}
 			if( s_ActiveWindows.Contains( this) == false)
 			{
@@ -90,7 +90,7 @@ namespace Finder
 			}
 			m_Contents.OnEnable( () =>
 			{
-				var window = CreateNewWindow<Finder>( null);
+				var window = CreateNewWindow<AssetFinder>( null);
 				var windowPosition = position;
 				windowPosition.x += 32;
 				windowPosition.y += 32;
@@ -179,7 +179,7 @@ namespace Finder
 			}
 			GUILayout.EndArea();
 		}
-		static List<Finder> s_ActiveWindows = null;
+		static List<AssetFinder> s_ActiveWindows = null;
 		
 		[SerializeField]
 		Contents m_Contents;

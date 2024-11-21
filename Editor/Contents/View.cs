@@ -513,9 +513,11 @@ namespace Finder
 			{
 				if( element.Directory == false)
 				{
-					var item = new Element( element);
-					item.depth = 0;
-					rows.Add( item);
+                    var item = new Element( element)
+                    {
+                        depth = 0
+                    };
+                    rows.Add( item);
 				}
 				if( element.ChildElements.Count > 0)
 				{

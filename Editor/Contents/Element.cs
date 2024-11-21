@@ -1,5 +1,4 @@
-﻿#define WITH_TREEVIEWITEM
-#define WITH_SERIALIZE_LOCALFILEIDENTIFIER
+﻿#define WITH_SERIALIZE_LOCALFILEIDENTIFIER
 
 using System.Linq;
 using System.Reflection;
@@ -10,22 +9,8 @@ using UnityEditor.IMGUI.Controls;
 
 namespace Finder
 {
-#if WITH_TREEVIEWITEM
 	internal sealed class Element : TreeViewItem
-#else
-	internal sealed class Element
-#endif
 	{
-		static string EnclosedString( string src, string begin, string end)
-		{
-			int beginIndex = src.LastIndexOf( begin);
-			int endIndex = src.IndexOf( end);
-			if( beginIndex >= 0 && endIndex >= 0 && beginIndex < endIndex)
-			{
-				return src.Substring( ++beginIndex, endIndex - beginIndex);
-			}
-			return string.Empty;
-		}
 		internal static Element Create( ElementSource source)
 		{
 			if( source is ElementComponentSource component)
@@ -33,7 +18,7 @@ namespace Finder
                 var element = new Element
                 {
                     id = component.Path.GetHashCode(),
-                    name = component.Name,
+                    Name = component.Name,
                     Extension = string.Empty,
                     Path = component.Path,
                     Guid = component.LocalId.ToString(),
@@ -75,14 +60,14 @@ namespace Finder
                     };
                     if( element.Directory != false)
 					{
-						element.name = System.IO.Path.GetFileName( path);
+						element.Name = System.IO.Path.GetFileName( path);
 						element.Extension = string.Empty;
 						element.AssetType = AssetType.Directory;
 						element.Reference = -1;
 					}
 					else
 					{
-						element.name = System.IO.Path.GetFileNameWithoutExtension( path);
+						element.Name = System.IO.Path.GetFileNameWithoutExtension( path);
 						element.Extension = System.IO.Path.GetExtension( path);
 						
 						if( AssetTypes.kExtensions.TryGetValue( element.Extension, out AssetType assetType) != false)
@@ -125,16 +110,13 @@ namespace Finder
 		internal Element()
 		{
 			ChildElements = new List<Element>();
-		#if WITH_TREEVIEWITEM
 			children = new List<TreeViewItem>();
-		#endif
 		}
-	#if WITH_TREEVIEWITEM
 		internal Element( Element src)
 		{
 			id = src.id;
 			depth = src.depth;
-			name = src.name;
+			Name = src.Name;
 			Extension = src.Extension;
 			Path = src.Path;
 			Guid = src.Guid;
@@ -151,13 +133,10 @@ namespace Finder
 			children = src.children;
 		}
 		internal Element( SerializableElementNode node, List<Element> srcChildElements, List<TreeViewItem> srcChildren)
-	#else
-		internal Element( SerializableElementNode node, List<Element> srcChildElements)
-	#endif
 		{
 			id = node.id;
 			depth = node.depth;
-			name = node.name;
+			Name = node.Name;
 			Extension = node.Extension;
 			Path = node.Path;
 			Guid = node.Guid;
@@ -174,13 +153,12 @@ namespace Finder
 			{
 				child.ParentElement = this;
 			}
-		#if WITH_TREEVIEWITEM
 			children = srcChildren;
+			
 			foreach( var child in srcChildren)
 			{
 				child.parent = this;
 			}
-		#endif
 		}
 		internal void Add( Element element)
 		{
@@ -188,10 +166,9 @@ namespace Finder
 			{
 				element.ParentElement.Remove( element);
 			}
-		#if WITH_TREEVIEWITEM
 			children.Add( element);
 			parent = this;
-		#endif
+			
 			ChildElements.Add( element);
 			element.ParentElement = this;
 			element.depth = depth + 1;
@@ -200,10 +177,9 @@ namespace Finder
 		{
 			if( ChildElements.Contains( element) != false)
 			{
-			#if WITH_TREEVIEWITEM
 				children.Remove( element);
 				element.parent = null;
-			#endif
+				
 				ChildElements.Remove( element);
 				element.ParentElement = null;
 				element.depth = 0;
@@ -307,7 +283,7 @@ namespace Finder
 			{
 				compare = kComparePrefix;
 			}
-			compare += name;
+			compare += Name;
 			
 			return compare;
 		}
@@ -419,29 +395,19 @@ namespace Finder
 			System.Text.Encoding.ASCII.GetString( 
 				Enumerable.Repeat( (byte)0x20, 260).ToArray());
 		
-	#if WITH_TREEVIEWITEM
-		public override string displayName{ get{ return name; } set{} }
-	#endif
-	#if !WITH_TREEVIEWITEM
-		internal int id{ get; private set; }
-		internal int depth{ get; private set; }
-	#endif
-		internal string name{ get; private set; }
+		public override string displayName{ get{ return Name; } set{} }
+		internal string Name{ get; private set; }
 		internal string Extension{ get; private set; }
 		internal string Path{ get; private set; }
 		internal string Guid{ get; private set; }
 		internal string FindPath{ get; private set; }
 		internal AssetType AssetType{ get; private set; }
-	#if !WITH_TREEVIEWITEM
-		internal Texture2D icon{ get; private set; }
-	#endif
 		internal bool Directory{ get; private set; }
 		internal int Reference{ get; private set; }
 		internal int Missing{ get; private set; }
 		internal long LocalId{ get; private set; }
 		internal Element ParentElement{ get; set; }
 		internal List<Element> ChildElements{ get; set; }
-		
 		internal int ValidCount{ get; set; }
 	}
 	[System.Serializable]
@@ -480,10 +446,8 @@ namespace Finder
 		Element Deserialize( int index, out int count)
 		{
 			SerializableElementNode node = root[ index];
-		
-		#if WITH_TREEVIEWITEM
+			
 			var children = new List<TreeViewItem>();
-		#endif	
 			var ChildElements = new List<Element>();
 			Element element;
 			int childCount;
@@ -492,19 +456,13 @@ namespace Finder
 			for( int i0 = 0; i0 < node.ChildCount; ++i0)
 			{
 				element = Deserialize( node.IndexOfFirstChild + offset + i0, out childCount);
-			#if WITH_TREEVIEWITEM
 				children.Add( element);
-			#endif
 				ChildElements.Add( element);
 				offset += childCount;
 			}
 			count = node.ChildCount + offset;
 			
-		#if WITH_TREEVIEWITEM
 			return new Element( node, ChildElements, children);
-		#else
-			return new Element( node, ChildElements);
-		#endif
 		}
 		[SerializeField]
 		List<SerializableElementNode> root;
@@ -516,7 +474,7 @@ namespace Finder
 		{
 			id = element.id;
 			depth = element.depth;
-			name = element.name;
+			Name = element.Name;
 			Extension = element.Extension;
 			Path = element.Path;
 			Guid = element.Guid;
@@ -535,7 +493,7 @@ namespace Finder
 		[SerializeField]
 		internal int depth;
 		[SerializeField]
-		internal string name;
+		internal string Name;
 		[SerializeField]
 		internal string Extension;
 		[SerializeField]

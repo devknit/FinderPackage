@@ -114,7 +114,7 @@ namespace Finder
 				}
 				foreach( var name in m_Names)
 				{
-					if( element.name.IndexOf( name, StringComparison.OrdinalIgnoreCase) < 0)
+					if( element.Name.IndexOf( name, StringComparison.OrdinalIgnoreCase) < 0)
 					{
 						return false;
 					}

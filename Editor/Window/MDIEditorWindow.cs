@@ -20,6 +20,7 @@ namespace MDI.Editor
 			{
 				window.m_Handle = null;
 			}
+			window.titleContent = new GUIContent( ObjectNames.NicifyVariableName( typeof( T).Name));
 			window.Clear();
 			window.Init();
 			window.m_IsInitialized = true;
@@ -45,12 +46,12 @@ namespace MDI.Editor
 			if( handle != null)
 			{
 				window.m_Handle = SerializationObject.CreateInstance( handle);
-				window.titleContent = new GUIContent( typeof( T).Name);
 			}
 			else
 			{
 				window.m_Handle = null;
 			}
+			window.titleContent = new GUIContent( ObjectNames.NicifyVariableName( typeof( T).Name));
 			window.Clear();
 			window.Init();
 			window.m_IsInitialized = true;
