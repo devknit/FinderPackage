@@ -11,7 +11,11 @@ using UnityEditor.IMGUI.Controls;
 namespace Finder
 {
 #if WITH_TREEVIEWITEM
+#if UNITY_6000_4_OR_NEWER
+	internal sealed class Element : TreeViewItem<int>
+#else
 	internal sealed class Element : TreeViewItem
+#endif
 #else
 	internal sealed class Element
 #endif
@@ -125,11 +129,15 @@ namespace Finder
 		internal Element()
 		{
 			ChildElements = new List<Element>();
-		#if WITH_TREEVIEWITEM
+	#if WITH_TREEVIEWITEM
+		#if UNITY_6000_4_OR_NEWER
+			children = new List<TreeViewItem<int>>();
+		#else
 			children = new List<TreeViewItem>();
 		#endif
+	#endif
 		}
-	#if WITH_TREEVIEWITEM
+#if WITH_TREEVIEWITEM
 		internal Element( Element src)
 		{
 			id = src.id;
@@ -150,10 +158,14 @@ namespace Finder
 			parent = src.parent;
 			children = src.children;
 		}
-		internal Element( SerializableElementNode node, List<Element> srcChildElements, List<TreeViewItem> srcChildren)
+	#if UNITY_6000_4_OR_NEWER
+		internal Element( SerializableElementNode node, List<Element> srcChildElements, List<TreeViewItem<int>> srcChildren)
 	#else
-		internal Element( SerializableElementNode node, List<Element> srcChildElements)
+		internal Element( SerializableElementNode node, List<Element> srcChildElements, List<TreeViewItem> srcChildren)
 	#endif
+#else
+		internal Element( SerializableElementNode node, List<Element> srcChildElements)
+#endif
 		{
 			id = node.id;
 			depth = node.depth;
@@ -327,7 +339,11 @@ namespace Finder
 					}
 					else
 					{
+					#if UNITY_6000_4_OR_NEWER
+						Selection.entityIds = selectObjects.Select( x => x.GetEntityId()).ToArray();
+					#else
 						Selection.instanceIDs = selectObjects.Select( x => x.GetInstanceID()).ToArray();
+					#endif
 					}
 				}
 			}
@@ -481,9 +497,13 @@ namespace Finder
 		{
 			SerializableElementNode node = root[ index];
 		
-		#if WITH_TREEVIEWITEM
+	#if WITH_TREEVIEWITEM
+		#if UNITY_6000_4_OR_NEWER
+			var children = new List<TreeViewItem<int>>();
+		#else
 			var children = new List<TreeViewItem>();
-		#endif	
+		#endif
+	#endif	
 			var ChildElements = new List<Element>();
 			Element element;
 			int childCount;

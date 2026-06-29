@@ -15,7 +15,11 @@ namespace Finder
 		internal Explorer( List<Element> elements, View.Column columnMask) 
 		{
 			m_HeaderState = View.CreateHeaderState( columnMask);
+		#if UNITY_6000_4_OR_NEWER
+			m_ViewState = new TreeViewState<int>();
+		#else
 			m_ViewState = new TreeViewState();
+		#endif
 			m_SerializableElement = new SerializableElementRoot();
 			m_Elements = elements;
 		}
@@ -444,11 +448,15 @@ namespace Finder
 			m_Elements = rootElement.ChildElements;
 		}
 		[SerializeField]
-        TreeViewState m_ViewState;
+	#if UNITY_6000_4_OR_NEWER
+		TreeViewState<int> m_ViewState;
+	#else
+		TreeViewState m_ViewState;
+	#endif
 		[SerializeField]
 		MultiColumnHeaderState m_HeaderState;
 		[SerializeField]
-        SerializableElementRoot m_SerializableElement;
+		SerializableElementRoot m_SerializableElement;
 		// [SerializeField]
 		// View.Type m_ViewType;
 		[SerializeField]
